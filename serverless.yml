@@ -1,0 +1,57 @@
+service: kube-auth-store
+
+provider:
+  name: aws
+  runtime: python3.6
+
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "secretsmanager:*"
+      Resource: "*" 
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:*"
+      Resource: "*"
+
+  environment:
+    DYNAMODB_TABLE_K8_CLUSTERS: ${self:service}-${opt:stage, self:provider.stage}-clusters
+
+functions:
+  post_cluster:
+    handler: handler.post_cluster
+    events:
+      - http:
+          path: clusters/add
+          method: post
+  list_clusters:
+    handler: handler.post_cluster
+    events:
+      - http:
+          path: clusters/list
+          method: get
+  get_cluster_creds:
+    handler: handler.post_cluster
+    events:
+      - http:
+          path: clusters/creds
+          method: get
+
+resources:
+  Resources:
+    KubeAuthStoreClustersDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Delete
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 2
+          WriteCapacityUnits: 3
+        TableName: '${self:provider.environment.DYNAMODB_TABLE_K8_CLUSTERS}'
