@@ -4,7 +4,10 @@ kube-auth-store - Provides a secure serverless API to store and retrieve k8s clu
 
 ## Post cluster and creds
 ```bash
-curl --header "X-Api-Key xxx" -X POST -d "$(kubectl get config --flatten -o json)" http://xxxxxxxx.execute-api.us-west-2.amazon.aws.com/dev/clusters/add
+curl --header "X-Api-Key xxx" \
+  -X POST \
+  -d "$(kubectl get config --flatten -o json)"  \
+  http://xxxxxxxx.execute-api.us-west-2.amazon.aws.com/dev/clusters/add
 ```
 
 ## Todo
