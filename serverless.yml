@@ -41,6 +41,7 @@ functions:
           path: clusters/add
           method: post
           private: true
+          
 resources:
   Resources:
     KubeAuthStoreClustersDynamoDbTable:
