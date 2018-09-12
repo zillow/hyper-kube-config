@@ -2,10 +2,10 @@ import json
 import os
 import boto3
 
-dynamodb = boto3.resource('dynamodb')
-cluster_table_name = os.environ['DYNAMODB_TABLE_K8_CLUSTERS']
-cluster_table = dynamodb.Table(cluster_table_name)
-secrets_client = boto3.client('secretsmanager')
+DYNAMODB = boto3.resource('dynamodb')
+CLUSTER_TABLE_NAME = os.environ['DYNAMODB_TABLE_K8_CLUSTERS']
+CLUSTER_TABLE = DYNAMODB.Table(CLUSTER_TABLE_NAME)
+SECRETS_CLIENT = boto3.client('secretsmanager')
 
 def add_cluster(event, context):
     """Add cluster and initial credentials"""
@@ -22,8 +22,8 @@ def add_cluster(event, context):
         raise err
     # Put into dynamodb cluster info
 
-    if validate_unique_cluster_name(cluster_table_name, cluster_name) is None:
-        cluster_table.put_item(
+    if validate_unique_cluster_name(cluster_name) is None:
+        CLUSTER_TABLE.put_item(
             Item={
                 'id': cluster_name,
                 'server': cluster_server
@@ -35,17 +35,17 @@ def add_cluster(event, context):
         user_client_key = cluster_config['users'][0]['user']['client-key-data']
         user_client_certificate_data = cluster_config['users'][0]['user']['client-certificate-data']
 
-        secrets_client.create_secret(
+        SECRETS_CLIENT.create_secret(
             Name=f'user-{user_name}-{cluster_name}',
             SecretString=password
         )
 
-        secrets_client.create_secret(
+        SECRETS_CLIENT.create_secret(
             Name=f'user-client-key-{user_name}-{cluster_name}',
             SecretString=user_client_key
         )
 
-        secrets_client.create_secret(
+        SECRETS_CLIENT.create_secret(
             Name=f'user-client-certificate-data-{user_name}-{cluster_name}',
             SecretString=user_client_certificate_data
         )
@@ -71,10 +71,10 @@ def validate_config_input(config):
     except ValueError as err:
         print(f'K8s config is not valid json error: {err}')
 
-def validate_unique_cluster_name(cluster_table_name, cluster_name):
+def validate_unique_cluster_name(cluster_name):
     """Validate cluster is a unique name"""
     try:
-        item = cluster_table.get_item(Key={"id": cluster_name})
+        item = CLUSTER_TABLE.get_item(Key={"id": cluster_name})
         print(f"Cluster {cluster_name} already exists: {item['Item']}")
     except:
         print(f'Cluster {cluster_name} not found')
