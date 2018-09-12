@@ -41,6 +41,13 @@ functions:
           path: clusters/add
           method: post
           private: true
+  remove_cluster:
+    handler: remove_cluster.remove_cluster
+    events:
+      - http:
+          path: clusters/remove
+          method: post
+          private: true
           
 resources:
   Resources:

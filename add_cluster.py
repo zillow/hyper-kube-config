@@ -1,6 +1,7 @@
 import json
 import os
 import boto3
+from util import validate_config_input, validate_unique_cluster_name
 
 DYNAMODB = boto3.resource('dynamodb')
 CLUSTER_TABLE_NAME = os.environ['DYNAMODB_TABLE_K8_CLUSTERS']
@@ -22,19 +23,20 @@ def add_cluster(event, context):
         raise err
     # Put into dynamodb cluster info
 
-    if validate_unique_cluster_name(cluster_name) is None:
-        CLUSTER_TABLE.put_item(
-            Item={
-                'id': cluster_name,
-                'server': cluster_server
-            }
-        )
-        # Put into secrets manager
+    if validate_unique_cluster_name(cluster_name, CLUSTER_TABLE) is None:
         user_name = cluster_config['users'][0]['user']['username']
         password  = cluster_config['users'][0]['user']['password']
         user_client_key = cluster_config['users'][0]['user']['client-key-data']
         user_client_certificate_data = cluster_config['users'][0]['user']['client-certificate-data']
+        CLUSTER_TABLE.put_item(
+            Item={
+                'id': cluster_name,
+                'server': cluster_server,
+                'users': [user_name] 
+            }
+        )
 
+        # Put into secrets manager
         SECRETS_CLIENT.create_secret(
             Name=f'user-{user_name}-{cluster_name}',
             SecretString=password
@@ -62,21 +64,3 @@ def add_cluster(event, context):
             {"message": f'Cluster {cluster_name} already exists'}
         )
     }
-
-
-def validate_config_input(config):
-    """Validate config input is JSON"""
-    try:
-        json.loads(config)
-    except ValueError as err:
-        print(f'K8s config is not valid json error: {err}')
-
-def validate_unique_cluster_name(cluster_name):
-    """Validate cluster is a unique name"""
-    try:
-        item = CLUSTER_TABLE.get_item(Key={"id": cluster_name})
-        print(f"Cluster {cluster_name} already exists: {item['Item']}")
-    except:
-        print(f'Cluster {cluster_name} not found')
-        item = None
-    return item
