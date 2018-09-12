@@ -1,8 +1,23 @@
 service: kube-auth-store
 
+#plugins:
+#  - serverless-domain-manager
+#
+#custom:
+#  customDomain:
+#    domainName: ${opt:domain}
+#    basePath: 'api'
+#    stage: ${self:provider.stage}
+#    createRoute53Record: true
+#    certificateName: ${opt:certificate_name}
+#    endpointType: "edge"
+
 provider:
   name: aws
   runtime: python3.6
+  region: us-west-2
+  apiKeys:
+    - ${opt:stage, self:provider.stage}-key
 
   iamRoleStatements:
     - Effect: "Allow"
@@ -16,27 +31,16 @@ provider:
 
   environment:
     DYNAMODB_TABLE_K8_CLUSTERS: ${self:service}-${opt:stage, self:provider.stage}-clusters
+    DOMAIN_NAME: ${opt:domain}
 
 functions:
-  post_cluster:
-    handler: handler.post_cluster
+  add_cluster:
+    handler: add_cluster.add_cluster
     events:
       - http:
           path: clusters/add
           method: post
-  list_clusters:
-    handler: handler.post_cluster
-    events:
-      - http:
-          path: clusters/list
-          method: get
-  get_cluster_creds:
-    handler: handler.post_cluster
-    events:
-      - http:
-          path: clusters/creds
-          method: get
-
+          private: true
 resources:
   Resources:
     KubeAuthStoreClustersDynamoDbTable:
