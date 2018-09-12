@@ -43,7 +43,7 @@ def add_cluster(event, context):
         )
 
         SECRETS_CLIENT.create_secret(
-            Name=f'user-client-key-{user_name}-{cluster_name}',
+            Name=f'user-client-key-data-{user_name}-{cluster_name}',
             SecretString=user_client_key
         )
 

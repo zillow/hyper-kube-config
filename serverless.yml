@@ -48,6 +48,13 @@ functions:
           path: clusters/remove
           method: post
           private: true
+  get_user_creds:
+    handler: get_user_creds.get_user_creds 
+    events:
+      - http:
+          path: clusters/get-user-creds
+          method: get
+          private: true
           
 resources:
   Resources:

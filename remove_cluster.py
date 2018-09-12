@@ -12,7 +12,7 @@ SECRETS_CLIENT = boto3.client('secretsmanager')
 def remove_cluster(event, context):
     """Remove cluster and all associated credentials"""
 
-    """{ cluster_name: "foo-prod-cluster.com" }"""
+    """{ "cluster_name": "foo-prod-cluster.com" }"""
     validate_config_input(event['body'])
     post_body = json.loads(event['body'])
     cluster_name = post_body['cluster_name']
@@ -47,7 +47,7 @@ def remove_cluster(event, context):
 
 def delete_secrets(user, cluster_name):
     """Delete secrets"""
-    user_secrets = ['user', 'user-client-key', 'user-client-certificate-data']
+    user_secrets = ['user', 'user-client-key-data', 'user-client-certificate-data']
 
     for secret in user_secrets:
         try: 

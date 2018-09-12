@@ -21,9 +21,17 @@ curl \
    https://xxxxxxxx.execute-api.us-west-2.amazonaws.com/dev/clusters/remove
 ```
 
+## Get user creds
+```bash
+curl \
+  --header "X-Api-Key: xxxx" \
+  --request GET \
+  "https://xxxxx.execute-api.us-west-2.amazonaws.com/dev/clusters/get-user-creds?user=admin&cluster_name=foo-cluster.cloud"
+```
+
 ## Todo
 
-* Get creds 
+* Generate one config 
   - Return a Kube config file in yaml format with any number of clusters in it. Allowing end user to then switch context from one config
 * Update creds based upon cluster and user input
 * Delete indiviual creds based upon cluster and user input
