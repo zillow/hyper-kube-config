@@ -1,8 +1,10 @@
 service: kube-auth-store
 
-#plugins:
+
+plugins:
+  - serverless-python-requirements
 #  - serverless-domain-manager
-#
+
 #custom:
 #  customDomain:
 #    domainName: ${opt:domain}
