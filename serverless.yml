@@ -3,16 +3,10 @@ service: kube-auth-store
 
 plugins:
   - serverless-python-requirements
-#  - serverless-domain-manager
 
-#custom:
-#  customDomain:
-#    domainName: ${opt:domain}
-#    basePath: 'api'
-#    stage: ${self:provider.stage}
-#    createRoute53Record: true
-#    certificateName: ${opt:certificate_name}
-#    endpointType: "edge"
+custom:
+  pythonRequirements:
+    vendor: ./vendor-boto3
 
 provider:
   name: aws

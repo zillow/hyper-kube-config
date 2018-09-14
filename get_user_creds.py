@@ -1,5 +1,7 @@
 import json
 import os
+import sys
+sys.path.insert(0, './vendor-boto3')
 import boto3
 from util import validate_config_input, validate_unique_cluster_name
 

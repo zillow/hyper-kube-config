@@ -14,6 +14,5 @@ def validate_unique_cluster_name(cluster_name, cluster_table):
         item = cluster_table.get_item(Key={"id": cluster_name})
         print(f"Cluster {cluster_name} exists: {item['Item']}")
     except:
-        print(f'Cluster {cluster_name} not found')
         item = None
     return item

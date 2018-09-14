@@ -1,5 +1,7 @@
 import json
 import os
+import sys
+sys.path.insert(0, './vendor-boto3')
 import boto3
 from util import validate_config_input, validate_unique_cluster_name
 
@@ -19,12 +21,35 @@ def remove_cluster(event, context):
 
     if validate_unique_cluster_name(cluster_name, CLUSTER_TABLE) is not None:
 
-        cluster = CLUSTER_TABLE.get_item(Key={"id": cluster_name})
-
         # Remove associated user secrets
-        for user in cluster['Item']['users']:
-            delete_secrets(user, cluster_name)
-        
+        list_of_secrets = SECRETS_CLIENT.list_secrets()
+        delete_secrets(list_of_secrets, cluster_name)
+
+        #SECRETS_CLIENT.delete_secret(
+        #                SecretId="cloud-infra.cloud-client-certificate-data-cloud-infra.cloud",
+        #                ForceDeleteWithoutRecovery=True
+        #            )
+        #SECRETS_CLIENT.delete_secret(
+        #                SecretId="cloud-infra.cloud-client-key-data-cloud-infra.cloud",
+        #                ForceDeleteWithoutRecovery=True
+        #            )
+        #SECRETS_CLIENT.delete_secret(
+        #                SecretId="cloud-infra.cloud-username-cloud-infra.cloud",
+        #                ForceDeleteWithoutRecovery=True
+        #            )
+        #SECRETS_CLIENT.delete_secret(
+        #                SecretId="cloud-infra.cloud-password-cloud-infra.cloud",
+        #                ForceDeleteWithoutRecovery=True
+        #            )
+        #SECRETS_CLIENT.delete_secret(
+        #                SecretId="cloud-infra.cloud-basic-auth-username-cloud-infra.cloud",
+        #                ForceDeleteWithoutRecovery=True
+        #           )
+        #SECRETS_CLIENT.delete_secret(
+        #                SecretId="cloud-infra.cloud-basic-auth-password-cloud-infra.cloud",
+        #                ForceDeleteWithoutRecovery=True
+        #            )
+
         # Remove cluster
         CLUSTER_TABLE.delete_item(
             Key={
@@ -45,15 +70,17 @@ def remove_cluster(event, context):
         )
     }
 
-def delete_secrets(user, cluster_name):
+def delete_secrets(list_of_secrets, cluster_name):
     """Delete secrets"""
-    user_secrets = ['user', 'user-client-key-data', 'user-client-certificate-data']
-
-    for secret in user_secrets:
-        try: 
-            SECRETS_CLIENT.delete_secret(
-                SecretId=f'{secret}-{user}-{cluster_name}',
-                ForceDeleteWithoutRecovery=True
-            )
-        except Exception as err:
-            print(f"Secret {secret} not found, nothing to delete: {err}")
+    print(f'BOTO3 VERSION: {boto3.__version__}')
+    print(list_of_secrets)
+    for secret in list_of_secrets['SecretList']:
+        for tag in secret['Tags']:
+            if tag['Key'] == 'cluster_name' and tag['Value'] == cluster_name:
+                try:
+                    SECRETS_CLIENT.delete_secret(
+                        SecretId=f"{secret['Name']}",
+                        ForceDeleteWithoutRecovery=True
+                    )
+                except Exception as err:
+                    print(f"Secret {secret} not found, nothing to delete: {err}")
