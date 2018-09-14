@@ -6,6 +6,7 @@ plugins:
 custom:
   pythonRequirements:
     noDeploy: []
+    dockerizePip: true
 
 provider:
   name: aws
