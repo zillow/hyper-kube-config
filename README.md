@@ -14,6 +14,7 @@ http post https://xxxxxxxx.execute-api.us-west-2.amazonaws.com/dev/clusters/remo
 ```
 
 ## Get user creds
+## Todo 
 ```bash
 http get https://xxxxx.execute-api.us-west-2.amazonaws.com/dev/clusters/get-user-creds?user=admin&cluster_name=foo-cluster.cloud X-Api-Key:xxxx 
 ```
