@@ -1,12 +1,11 @@
 service: kube-auth-store
 
-
 plugins:
   - serverless-python-requirements
 
 custom:
   pythonRequirements:
-    vendor: ./vendor-boto3
+    noDeploy: []
 
 provider:
   name: aws
