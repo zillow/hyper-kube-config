@@ -4,29 +4,18 @@ kube-auth-store - Provides a secure serverless API to store and retrieve k8s clu
 
 ## Post cluster and creds
 ```bash
-curl \
-  --header "X-Api-Key xxx" \
-  -X POST \
-  -d "$(kubectl config view --flatten -o json)"  \
-  http://xxxxxxxx.execute-api.us-west-2.amazon.aws.com/dev/clusters/add
+kubectl config view --flatten -o json \
+  | http post http://xxxxxxxx.execute-api.us-west-2.amazon.aws.com/dev/clusters/add X-Api-Key:xxxx  
 ```
 
 ## Remove cluster and creds
 ```bash
-curl \
-  --header "Content-Type: application/json" \
-  --header "X-Api-Key: xxx" \
-  --request POST \
-  --data '{ "cluster_name": "k8s-cluster.cloud"}' \
-   https://xxxxxxxx.execute-api.us-west-2.amazonaws.com/dev/clusters/remove
+http post https://xxxxxxxx.execute-api.us-west-2.amazonaws.com/dev/clusters/remove X-Api-Key:xxxx cluster_name=k8s-cluster.cloud
 ```
 
 ## Get user creds
 ```bash
-curl \
-  --header "X-Api-Key: xxxx" \
-  --request GET \
-  "https://xxxxx.execute-api.us-west-2.amazonaws.com/dev/clusters/get-user-creds?user=admin&cluster_name=foo-cluster.cloud"
+http get https://xxxxx.execute-api.us-west-2.amazonaws.com/dev/clusters/get-user-creds?user=admin&cluster_name=foo-cluster.cloud X-Api-Key:xxxx 
 ```
 
 ## Todo
@@ -41,6 +30,7 @@ curl \
 ## Requirements
 
 * [Serverless](https://serverless.com/)
+* [HTTPie](https://httpie.org/) - recommended for API client
 
 ### Deploying 
 
