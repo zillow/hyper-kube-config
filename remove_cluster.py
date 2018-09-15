@@ -47,9 +47,13 @@ def remove_cluster(event, context):
 
 def delete_secrets(cluster_name):
     """Delete secrets"""
-    print(SECRETS_CLIENT.list_secrets())
-    secret_list = SECRETS_CLIENT.list_secrets()
-    for secret in secret_list['SecretList']:
+    resp = SECRETS_CLIENT.list_secrets()
+    secrets = []
+    while resp:
+        secrets += resp['SecretList']
+        resp = SECRETS_CLIENT.list_secrets(NextToken=resp['NextToken']) if 'NextToken' in resp else None
+
+    for secret in secrets:
         if 'Tags' in secret:
             for tag in secret['Tags']:
                 if tag['Key'] == 'cluster_name' and tag['Value'] == cluster_name:
@@ -61,11 +65,3 @@ def delete_secrets(cluster_name):
                         )
                     except Exception as err:
                         print(f"Secret {secret} not found, nothing to delete: {err}")
-
-# Doesn't work, list_secrets doest support pagninator yet :/
-#def paginate():
-#    client = SECRETS_CLIENT 
-#    paginator = client.get_paginator("list_secrets")
-#    for page in paginator.paginate().result_key_iters():
-#        for result in page:
-#            yield result
