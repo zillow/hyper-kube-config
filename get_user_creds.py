@@ -53,3 +53,12 @@ def get_secrets(user, cluster_name):
             print(f"Secret {user_secret} not found, nothing to delete: {err}")
     
     return user_secret_response
+
+def generate_k8s_config_object():
+    config = {
+        "apiVersion": "v1",
+        "kind": "Config",
+        "preferences": {},
+        "clusters": {},
+        "users": {}
+        }
