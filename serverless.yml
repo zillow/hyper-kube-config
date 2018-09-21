@@ -44,11 +44,11 @@ functions:
           path: clusters/remove
           method: post
           private: true
-  get_user_creds:
-    handler: get_user_creds.get_user_creds 
+  get_k8s_config_object:
+    handler: get_k8_config.get_k8_config
     events:
       - http:
-          path: clusters/get-user-creds
+          path: clusters/get-k8-config
           method: get
           private: true
           
