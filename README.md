@@ -5,18 +5,26 @@ kube-auth-store - Provides a secure serverless API to store and retrieve k8s clu
 ## Post cluster and creds
 ```bash
 kubectl config view --flatten -o json \
-  | http post http://xxxxxxxx.execute-api.us-west-2.amazon.aws.com/dev/clusters/add X-Api-Key:xxxx  
+  | \
+  http post \
+  http://xxxxxxxx.execute-api.us-west-2.amazon.aws.com/dev/clusters/add \
+  X-Api-Key:xxxx
 ```
 
 ## Remove cluster and creds
 ```bash
-http post https://xxxxxxxx.execute-api.us-west-2.amazonaws.com/dev/clusters/remove X-Api-Key:xxxx cluster_name=k8s-cluster.cloud
+http post \
+  https://xxxxxxxx.execute-api.us-west-2.amazonaws.com/dev/clusters/remove \
+  X-Api-Key:xxxx \
+  cluster_name=k8s-cluster.cloud
 ```
 
 ## Get user creds
 ## Todo 
 ```bash
-http get https://xxxxx.execute-api.us-west-2.amazonaws.com/dev/clusters/get-user-creds?user=admin&cluster_name=foo-cluster.cloud X-Api-Key:xxxx 
+http get \
+  https://xxxxx.execute-api.us-west-2.amazonaws.com/dev/clusters/get-user-creds?user=admin&cluster_name=foo-cluster.cloud \
+  X-Api-Key:xxxx 
 ```
 
 ## Todo
