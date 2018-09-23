@@ -16,14 +16,14 @@ kubectl config view --flatten -o json \
 http post \
   https://xxxxxxxx.execute-api.us-west-2.amazonaws.com/dev/clusters/remove \
   X-Api-Key:xxxx \
-  cluster_name=k8s-cluster.cloud
+  cluster_name=k8s-clustehr.cloud
 ```
 
 ## Get user creds
 ## Todo 
 ```bash
 http get \
-  https://xxxxx.execute-api.us-west-2.amazonaws.com/dev/clusters/get-user-creds?user=admin&cluster_name=foo-cluster.cloud \
+  https://xxxxx.execute-api.us-west-2.amazonaws.com/dev/clusters/get-k8-config?foo-cluster.cloud \
   X-Api-Key:xxxx 
 ```
 
@@ -33,12 +33,13 @@ http get \
   - Return a Kube config file in yaml format with any number of clusters in it. Allowing end user to then switch context from one config
 * Update creds based upon cluster and user input
 * Delete indiviual creds based upon cluster and user input
-* Add creds to existing cluster (additional user configs for service or deploy users for example)
+* Add creds to existing cluster additional user configs for service or deploy users for example)
 * Limit IAM access to bare requirements for kube-auth-store
 
 ## Requirements
 
-* [Serverless](https://serverless.com/)
+* [Serverless](https://serverless.com/) - Serverless Framework
+* [Docker](https://docker.com) - For serverless deploy
 * [HTTPie](https://httpie.org/) - recommended for API client
 
 ### Deploying 

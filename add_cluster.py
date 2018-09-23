@@ -1,22 +1,21 @@
 import json
 import os
 import sys
-sys.path.insert(0, './vendor-boto3')
 import boto3
 from util import validate_config_input, validate_unique_cluster_name
-print(f'BOTO3 VERSION: {boto3.__version__}')
+
 DYNAMODB = boto3.resource('dynamodb')
 CLUSTER_TABLE_NAME = os.environ['DYNAMODB_TABLE_K8_CLUSTERS']
 CLUSTER_TABLE = DYNAMODB.Table(CLUSTER_TABLE_NAME)
 SECRETS_CLIENT = boto3.client('secretsmanager')
-CLUSTER_USERS = {}
 
 def add_cluster(event, context):
     """Add cluster and initial credentials"""
 
+    print(f'HERE IS event: {event}')
     validate_config_input(event['body'])
     cluster_config = json.loads(event['body'])
-    CLUSTER_USERS = cluster_config['users']
+    cluster_users = cluster_config['users']
 
     for cluster in get_clusters(cluster_config):
         try:
@@ -35,7 +34,7 @@ def add_cluster(event, context):
             for name in get_users(cluster_config):
                 for user_data,secret in name['user'].items():
                     save_creds(cluster_name, name['name'], user_data, secret)
-                    update_cluster_users_secret_name(cluster_name, name['name'], user_data)
+                    update_cluster_users_secret_name(cluster_name, name['name'], user_data, cluster_users)
 
             CLUSTER_TABLE.put_item(
                 Item={
@@ -43,7 +42,7 @@ def add_cluster(event, context):
                     'server': cluster_server,
                     'certificate-authority-data': cluster_authority, 
                     'users': [names],
-                    'users_config': CLUSTER_USERS
+                    'users_config': cluster_users
                 }
             )
 
@@ -93,8 +92,9 @@ def get_clusters(cluster_config):
     clusters = [cluster for cluster in cluster_config['clusters']]
     return clusters
 
-def update_cluster_users_secret_name(cluster_name, name, user_data):
+def update_cluster_users_secret_name(cluster_name, name, user_data, cluster_users):
     """Update secret data with AWS Secret Manager reference name"""
-    for user in CLUSTER_USERS['users']:
+    print(f'HERE is cluster_users: {cluster_users}')
+    for user in cluster_users:
         if user['name'] == name and user_data in user['user']:
             user['user'][user_data] = f'{name}-{user_data}-{cluster_name}'

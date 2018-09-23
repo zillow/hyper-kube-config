@@ -24,7 +24,7 @@ def get_k8_config(event, context):
         if validate_unique_cluster_name(cluster, CLUSTER_TABLE) is not None:
             
             cluster_item = CLUSTER_TABLE.get_item(Key={"id": cluster})
-            cluster_name = cluster
+            cluster_item = cluster_item['Item']
 
             config["clusters"].append(
                 {"cluster": 
@@ -34,14 +34,15 @@ def get_k8_config(event, context):
                     "name": cluster_item['id']
                 }
             )
-            for user in cluster_item['users_config']['users']:
-                for user_data in user:
-                    for user_key,secret in user_data['user'].items():
-                        secret = SECRETS_CLIENT.get_secret_value(
-                            SecretId=f'{user_data["name"]}-{user_key}-{cluster_name}'
-                        )
 
-            config["users"].append(cluster_item['user_config']['users'])
+            for user in cluster_item['users_config']:
+                for user_key, secret in user['user'].items():
+                    secret_response = SECRETS_CLIENT.get_secret_value(
+                        SecretId=secret
+                    ) 
+                    user['user'][user_key] = secret_response['SecretString'] 
+
+            config["users"].append(cluster_item['users_config'])
 
             return {
                 "statusCode": 200,
