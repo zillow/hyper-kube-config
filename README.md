@@ -29,8 +29,6 @@ http get \
 
 ## Todo
 
-* Generate one config 
-  - Return a Kube config file in yaml format with any number of clusters in it. Allowing end user to then switch context from one config
 * Update creds based upon cluster and user input
 * Delete indiviual creds based upon cluster and user input
 * Add creds to existing cluster additional user configs for service or deploy users for example)
