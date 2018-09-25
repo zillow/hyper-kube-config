@@ -27,7 +27,13 @@ provider:
 
   environment:
     DYNAMODB_TABLE_K8_CLUSTERS: ${self:service}-${opt:stage, self:provider.stage}-clusters
-    DOMAIN_NAME: ${opt:domain}
+
+  stackTags:
+    Environment: ${opt:stage}
+    Team: ${opt:team}
+    Owner: ${opt:owner}
+    Product: ${opt:product}
+    Service: "kube-auth-store"
 
 functions:
   add_cluster:

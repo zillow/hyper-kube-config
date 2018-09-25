@@ -43,5 +43,10 @@ http get \
 ### Deploying 
 
 ```bash
-sls deploy --stage dev --domain mydomain.net
+sls deploy \
+  --stage dev \
+  --product k8s \
+  --owner myteam@foo.cloud \
+  --team myteam \
+  --environment dev
 ```
