@@ -1,6 +1,6 @@
 # kube-auth-store
 
-kube-auth-store - Provides a secure serverless API to store and retrieve k8s cluster credentials objects. kube-auth-store leverages AWS Secrets Manager for storing credential information. No trust API configuration requiring API key for access
+kube-auth-store - Provides a secure [Serverless](https://serverless.com/) API to store and retrieve [Kubernetes cluster config credentials](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/). kube-auth-store leverages [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/index.html) for storing credential information.
 
 ## Post cluster and creds
 ```bash
@@ -43,3 +43,5 @@ sls deploy \
   --team myteam \
   --environment dev
 ```
+
+Serverless will launch an [AWS API Gateway](https://docs.aws.amazon.com/apigateway/index.html) to handle API requests forwardered to [AWS Lambda functions](https://docs.aws.amazon.com/lambda/index.html#lang/en_us). A Dynamodb table is configured to store non-senstative cluster config details, while sensative information in uploaded configs (passwords and certs) is stored in [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/index.html).
