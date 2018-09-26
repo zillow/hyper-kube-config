@@ -20,19 +20,12 @@ http post \
 ```
 
 ## Get user creds
-## Todo 
+
 ```bash
 http get \
   https://xxxxx.execute-api.us-west-2.amazonaws.com/dev/clusters/get-k8-config?foo-cluster.cloud \
   X-Api-Key:xxxx 
 ```
-
-## Todo
-
-* Update creds based upon cluster and user input
-* Delete indiviual creds based upon cluster and user input
-* Add creds to existing cluster additional user configs for service or deploy users for example)
-* Limit IAM access to bare requirements for kube-auth-store
 
 ## Requirements
 
