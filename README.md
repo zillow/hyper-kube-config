@@ -2,6 +2,8 @@
 
 kube-auth-store - Provides a secure [Serverless](https://serverless.com/) API to store and retrieve [Kubernetes cluster config credentials](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/). kube-auth-store leverages [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/index.html) for storing credential information.
 
+![kube-auth-store](https://user-images.githubusercontent.com/538171/46123053-1e91d700-c1d1-11e8-9769-24867047c9c9.png)
+
 ## Post cluster and creds
 ```bash
 kubectl config view --flatten -o json \
