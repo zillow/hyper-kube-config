@@ -29,11 +29,20 @@ http get \
   X-Api-Key:xxxx 
 ```
 
+## Get user creds multiple clusters
+
+```bash
+http get \
+  https://xxxxx.execute-api.us-west-2.amazonaws.com/dev/clusters/get-k8-config?foo-cluster.cloud&bar-cluster.cloud&baz-cluster.com \
+  X-Api-Key:xxxx 
+```
+
 ## Requirements
 
 * [Serverless](https://serverless.com/) - Serverless Framework
 * [Docker](https://docker.com) - For serverless deploy
 * [HTTPie](https://httpie.org/) - recommended for API client
+* serverless-python-requirements plugin. Uses Docker and Pip to package a newer vesion of Boto3 for AWS Lambda function use. AWS Lambda boto3 version by default doesn't have AWS Secrets Manager support for tags.
 
 ### Deploying 
 
