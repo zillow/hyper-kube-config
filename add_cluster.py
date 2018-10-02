@@ -1,6 +1,5 @@
 import json
 import os
-import sys
 import boto3
 from util import validate_config_input, validate_unique_cluster_name
 
@@ -9,10 +8,10 @@ CLUSTER_TABLE_NAME = os.environ['DYNAMODB_TABLE_K8_CLUSTERS']
 CLUSTER_TABLE = DYNAMODB.Table(CLUSTER_TABLE_NAME)
 SECRETS_CLIENT = boto3.client('secretsmanager')
 
-def add_cluster(event, context):
-    """Add cluster and initial credentials"""
 
-    print(f'HERE IS event: {event}')
+def add_cluster(event, context):
+    """Add cluster and initial credentials. Handler function for lambda (entry point)"""
+    
     validate_config_input(event['body'])
     cluster_config = json.loads(event['body'])
     cluster_users = cluster_config['users']
@@ -28,7 +27,6 @@ def add_cluster(event, context):
 
         # Put into dynamodb cluster info
         if validate_unique_cluster_name(cluster_name, CLUSTER_TABLE) is None:
-        
             names = [user['name'] for user in get_users(cluster_config)]
 
             for name in get_users(cluster_config):
@@ -40,7 +38,7 @@ def add_cluster(event, context):
                 Item={
                     'id': cluster_name,
                     'server': cluster_server,
-                    'certificate-authority-data': cluster_authority, 
+                    'certificate-authority-data': cluster_authority,
                     'users': [names],
                     'users_config': cluster_users
                 }
@@ -67,6 +65,7 @@ def get_users(cluster_config):
 
 def save_creds(cluster_name, name, user_data, secret):
     """Save creds for users in config object"""
+
     print(f'Saving {name}-{user_data}-{cluster_name} secret...')
     SECRETS_CLIENT.create_secret(
         Name=f'{name}-{user_data}-{cluster_name}',
@@ -74,7 +73,7 @@ def save_creds(cluster_name, name, user_data, secret):
         Tags=[
             {
                 'Key': 'cluster_name',
-                'Value': cluster_name 
+                'Value': cluster_name
             },
             {
                 'Key': 'name',

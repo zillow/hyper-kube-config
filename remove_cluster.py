@@ -1,8 +1,5 @@
 import json
 import os
-import sys
-import itertools
-sys.path.insert(0, './vendor-boto3')
 import boto3
 from util import validate_config_input, validate_unique_cluster_name
 
@@ -14,8 +11,8 @@ SECRETS_CLIENT = boto3.client('secretsmanager')
 
 def remove_cluster(event, context):
     """Remove cluster and all associated credentials"""
-
     """{ "cluster_name": "foo-prod-cluster.com" }"""
+
     validate_config_input(event['body'])
     post_body = json.loads(event['body'])
     cluster_name = post_body['cluster_name']
@@ -46,7 +43,8 @@ def remove_cluster(event, context):
     }
 
 def delete_secrets(cluster_name):
-    """Delete secrets"""
+    """Delete AWS Secrets Manager secrets"""
+
     resp = SECRETS_CLIENT.list_secrets()
     secrets = []
     while resp:

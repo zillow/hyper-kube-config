@@ -8,8 +8,10 @@ CLUSTER_TABLE_NAME = os.environ['DYNAMODB_TABLE_K8_CLUSTERS']
 CLUSTER_TABLE = DYNAMODB.Table(CLUSTER_TABLE_NAME)
 SECRETS_CLIENT = boto3.client('secretsmanager')
 
+
 def get_k8_config(event, context):
     """Generate k8 config object from list of clusters as query input"""
+    
     # /get_k8_configm?cloud-infra.cloud&cloud-infra-2.net
     clusters = event['queryStringParameters']
     config = {
