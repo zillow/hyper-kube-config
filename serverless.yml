@@ -19,7 +19,7 @@ provider:
     - Effect: "Allow"
       Action:
         - "secretsmanager:*"
-      Resource: "*" 
+      Resource: "k8s-auth-store*" 
     - Effect: "Allow"
       Action:
         - "dynamodb:*"
