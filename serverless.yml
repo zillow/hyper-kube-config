@@ -19,11 +19,15 @@ provider:
     - Effect: "Allow"
       Action:
         - "secretsmanager:*"
-      Resource: "k8s-auth-store*" 
+      Resource: "arn:aws:secretsmanager:*:*:secret:k8s-auth-store*" 
+    - Effect: "Allow"
+      Action:
+        - "secretsmanager:ListSecrets"
+      Resource: "*"
     - Effect: "Allow"
       Action:
         - "dynamodb:*"
-      Resource: "*"
+      Resource: "arn:aws:dynamodb:*:*:table/kube-auth-store*"
 
   environment:
     DYNAMODB_TABLE_K8_CLUSTERS: ${self:service}-${opt:stage, self:provider.stage}-clusters
