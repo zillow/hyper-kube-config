@@ -37,6 +37,12 @@ http get \
   X-Api-Key:xxxx 
 ```
 
+## List clusters
+
+```bash
+http get https://xxxxx.execute-api.us-west-2.amazonaws.com/dev/clusters/list X-Api-Key:xxxx 
+```
+
 ## Requirements
 
 * [Serverless](https://serverless.com/) - Serverless Framework
