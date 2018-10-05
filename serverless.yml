@@ -61,6 +61,13 @@ functions:
           path: clusters/get-k8-config
           method: get
           private: true
+  list_clusters:
+    handler: list_clusters.list_clusters
+    events:
+      - http:
+          path: clusters/list
+          method: get
+          private: true
           
 resources:
   Resources:
