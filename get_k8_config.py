@@ -44,7 +44,7 @@ def get_k8_config(event, context):
                     ) 
                     user['user'][user_key] = secret_response['SecretString'] 
 
-            config["users"].append(cluster_item['users_config'])
+            config["users"] = cluster_item['users_config']
 
             return {
                 "statusCode": 200,
