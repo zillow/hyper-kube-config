@@ -18,7 +18,7 @@ kubectl config view --flatten -o json \
 http post \
   https://xxxxxxxx.execute-api.us-west-2.amazonaws.com/dev/clusters/remove \
   X-Api-Key:xxxx \
-  cluster_name=k8s-clustehr.cloud
+  cluster_name=k8s-cluster.cloud
 ```
 
 ## Get user creds
@@ -42,7 +42,7 @@ http get \
 * [Serverless](https://serverless.com/) - Serverless Framework
 * [Docker](https://docker.com) - For serverless deploy
 * [HTTPie](https://httpie.org/) - recommended for API client
-* serverless-python-requirements plugin. Uses Docker and Pip to package a newer vesion of Boto3 for AWS Lambda function use. AWS Lambda boto3 version by default doesn't have AWS Secrets Manager support for tags.
+* [serverless-python-requirements](https://www.npmjs.com/package/serverless-python-requirements) plugin. Uses Docker and Pip to package a newer vesion of Boto3 for AWS Lambda function use. AWS Lambda boto3 version by default doesn't have AWS Secrets Manager support for tags.
 
 ### Deploying 
 
