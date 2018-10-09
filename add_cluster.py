@@ -68,7 +68,7 @@ def save_creds(cluster_name, name, user_data, secret):
 
     print(f'Saving {name}-{user_data}-{cluster_name} secret...')
     SECRETS_CLIENT.create_secret(
-        Name=f'k8s-auth-store-{name}-{user_data}-{cluster_name}',
+        Name=f'hyper-kube-config-{name}-{user_data}-{cluster_name}',
         SecretString=secret,
         Tags=[
             {
@@ -96,4 +96,4 @@ def update_cluster_users_secret_name(cluster_name, name, user_data, cluster_user
     print(f'HERE is cluster_users: {cluster_users}')
     for user in cluster_users:
         if user['name'] == name and user_data in user['user']:
-            user['user'][user_data] = f'k8s-auth-store-{name}-{user_data}-{cluster_name}'
+            user['user'][user_data] = f'hyper-kube-config-{name}-{user_data}-{cluster_name}'

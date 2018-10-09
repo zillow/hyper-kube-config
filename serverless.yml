@@ -1,4 +1,4 @@
-service: kube-auth-store
+service: hyper-kube-config
 
 plugins:
   - serverless-python-requirements
@@ -19,7 +19,7 @@ provider:
     - Effect: "Allow"
       Action:
         - "secretsmanager:*"
-      Resource: "arn:aws:secretsmanager:*:*:secret:k8s-auth-store*" 
+      Resource: "arn:aws:secretsmanager:*:*:secret:hyper-kube-config*" 
     - Effect: "Allow"
       Action:
         - "secretsmanager:ListSecrets"
@@ -27,7 +27,7 @@ provider:
     - Effect: "Allow"
       Action:
         - "dynamodb:*"
-      Resource: "arn:aws:dynamodb:*:*:table/kube-auth-store*"
+      Resource: "arn:aws:dynamodb:*:*:table/hyper-kube-config*"
 
   environment:
     DYNAMODB_TABLE_K8_CLUSTERS: ${self:service}-${opt:stage, self:provider.stage}-clusters
@@ -37,7 +37,7 @@ provider:
     Team: ${opt:team}
     Owner: ${opt:owner}
     Product: ${opt:product}
-    Service: "kube-auth-store"
+    Service: "hyper-kube-config"
 
 functions:
   add_cluster:
