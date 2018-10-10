@@ -13,7 +13,7 @@ provider:
   runtime: python3.6
   region: us-west-2
   apiKeys:
-    - ${opt:stage, self:provider.stage}-key
+    - ${self:service}-${opt:stage, self:provider.stage}-key
 
   iamRoleStatements:
     - Effect: "Allow"
