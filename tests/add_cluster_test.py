@@ -8,6 +8,7 @@ import add_cluster
 from moto import mock_dynamodb2
 
 class TestAddCluster(unittest.TestCase):
+    """Testing for add_cluster.py"""
 
     @mock_dynamodb2
     def test_add_cluster(self):
@@ -37,7 +38,7 @@ class TestAddCluster(unittest.TestCase):
         )
         self.hyper_kube_config_table = self.dynamodb.Table(os.environ["DYNAMODB_TABLE_K8_CLUSTERS"])
 
-        
+
 
 if __name__ == '__main__':
     unittest.main()
