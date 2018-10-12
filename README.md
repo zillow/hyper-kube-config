@@ -1,5 +1,7 @@
 # hyper-kube-config
 
+[![Build Status](https://travis-ci.org/silvermullet/hyper-kube-config.svg?branch=master)](https://travis-ci.org/silvermullet/hyper-kube-config)
+
 hyper-kube-config - Provides a secure [Serverless](https://serverless.com/) API to store and retrieve [Kubernetes cluster config credentials](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/). hyper-kube-config leverages [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/index.html) for storing credential information.
 
 ![hyper-kube-config](https://user-images.githubusercontent.com/538171/46702337-8edc2780-cbd7-11e8-8ba5-dbbe9916708a.png)
