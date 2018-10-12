@@ -4,6 +4,7 @@ python:
 
 env:
   - AWS_DEFAULT_REGION=us-east-1
+  - DYNAMODB_TABLE_K8_CLUSTERS='hyper-kube-config-test'
 
 install:
   - pip install -r requirements.txt
