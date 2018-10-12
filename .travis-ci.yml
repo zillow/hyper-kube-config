@@ -1,0 +1,12 @@
+language: python
+python:
+  - "3.6"
+
+env:
+  - AWS_DEFAULT_REGION=us-east-1
+
+install:
+  - pip install -r requirements.txt
+  - pip install -r tests/requirements.txt
+
+script: python -m unittest discover -s tests/ -p "*.py"
