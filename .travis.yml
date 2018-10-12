@@ -2,6 +2,9 @@ language: python
 python:
   - "3.6"
 
+before_install:
+  - sudo rm -f /etc/boto.cfg
+  
 env:
   - AWS_DEFAULT_REGION=us-east-1 DYNAMODB_TABLE_K8_CLUSTERS=hyper-kube-config-test
 
