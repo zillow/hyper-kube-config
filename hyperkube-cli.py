@@ -1,0 +1,78 @@
+import requests
+import click
+import sys
+import subprocess
+import yaml
+from pprint import pprint
+import json
+
+@click.group()
+@click.option('--config', '-c', required=True, default="~/hyperkube-config.yaml")
+@click.pass_context
+def cli(ctx, config):
+    ctx.ensure_object(dict)
+    ctx.obj['hyperkube_config'] = _load_config(config)
+    ctx.obj['url'] = ctx.obj['hyperkube_config']['url']
+    ctx.obj['stage'] = ctx.obj['hyperkube_config']['stage']
+    ctx.obj['headers'] = {'X-Api-Key': ctx.obj['hyperkube_config']['x_api_key']}
+
+@cli.command()
+@click.pass_context
+def list(ctx):
+    """List clusters in hyper-kube-config"""
+
+    try:
+        r = requests.get(
+            f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/list',
+            headers=ctx.obj['headers']
+        )
+        pprint(r.json())
+    except requests.exceptions.RequestException as err:
+        print(f'Request error: {err}')
+
+@cli.command()
+@click.option('--k8s-config', '-k', default="~/.kube/config")
+@click.pass_context
+def add(ctx, k8s_config):
+    """Add cluster to hyper-kube-config"""
+    
+    k8s_cfg = json.dumps(_load_config(k8s_config))
+
+    try:
+        r = requests.post(
+            f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/add',
+            headers=ctx.obj['headers'],
+            data=k8s_cfg
+        )
+        pprint(r.json())
+    except requests.exceptions.RequestException as err:
+        print(f'Request error: {err}')
+
+@cli.command()
+@click.option('--cluster-to-remove', '-k', required=True)
+@click.pass_context
+def remove(ctx, cluster_to_remove):
+    """Remove cluster from hyper-kube-config"""
+
+    try:
+        r = requests.post(
+            f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/remove',
+            headers=ctx.obj['headers'],
+            data=json.dumps({ "cluster_name": cluster_to_remove})
+        )
+        pprint(r.json())
+    except requests.exceptions.RequestException as err:
+        print(f'Request error: {err}')
+
+
+def _load_config(config):
+    """Loads yaml config to dict object"""
+    try:
+        with open(config, 'r') as ymlfile:
+            cfg = yaml.load(ymlfile)
+            return cfg
+    except FileNotFoundError as err:
+        sys.exit(1)
+
+if __name__ == '__main__':
+    cli(obj={})
