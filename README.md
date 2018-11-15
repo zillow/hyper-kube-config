@@ -11,7 +11,7 @@ hyper-kube-config - Provides a secure [Serverless](https://serverless.com/) API 
 ## Install hyperkube kubectl plugin
 
 ```bash
-pip3 install click
+pip3 install click requests pyyaml
 cp .cli/kubectl-hyperkube /usr/local/bin/
 ```
 
