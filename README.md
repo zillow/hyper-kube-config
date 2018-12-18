@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/silvermullet/hyper-kube-config.svg?branch=master)](https://travis-ci.org/silvermullet/hyper-kube-config)
 
+[![PyPI version](https://badge.fury.io/py/hyper-kube-config.svg)](https://badge.fury.io/py/hyper-kube-config)
+
 hyper-kube-config - Provides a secure [Serverless](https://serverless.com/) API to store and retrieve [Kubernetes cluster config credentials](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/). hyper-kube-config leverages [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/index.html) for storing credential information. Included is a [kubectl plugin](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/) to interface with hyperkube API. It just requires a configuration file. See hyperkube.yaml.example for layout.
 
 ![hyper-kube-config](https://user-images.githubusercontent.com/538171/46702337-8edc2780-cbd7-11e8-8ba5-dbbe9916708a.png)
