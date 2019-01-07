@@ -7,6 +7,8 @@ import subprocess
 import yaml
 from pprint import pprint
 import json
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.backends import default_backend
 
 @click.group()
 @click.option('--config', '-c', required=True, default="~/hyperkube-config.yaml")
@@ -45,6 +47,26 @@ def add(ctx, k8s_config):
             f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/add',
             headers=ctx.obj['headers'],
             data=k8s_cfg
+        )
+        pprint(r.json())
+    except requests.exceptions.RequestException as err:
+        print(f'Request error: {err}')
+
+@cli.command()
+@click.option('--ca-key', '-a', required=True)
+@click.option('--cluster-name', '-n', required=True)
+@click.pass_context
+def key(ctx, cluster_name, ca_key):
+    """Add cluster CA key to hyper-kube-config"""
+    
+    key = json.dumps(_load_ca_key(ca_key))
+    post = { "cluster_name": cluster_name, "ca_key": key }
+
+    try:
+        r = requests.post(
+            f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/add-ca-key',
+            headers=ctx.obj['headers'],
+            data=post
         )
         pprint(r.json())
     except requests.exceptions.RequestException as err:
@@ -97,6 +119,26 @@ def _load_config(config):
             cfg = yaml.load(ymlfile)
             return cfg
     except FileNotFoundError as err:
+        print(f'Error: {err}')
+        sys.exit(1)
+
+def _load_ca_key(ca_key):
+    """Loads ca key in pem format into crypto object"""
+    try:
+        with open(ca_key, 'r') as ca_key_file:
+            ca_key = ca_key_file.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.TraditionalOpenSSL,
+                encryption_algorithm=serialization.BestAvailableEncryption(b"password")
+            )
+
+            return bytes.decode(ca_key.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.TraditionalOpenSSL,
+                encryption_algorithm=serialization.NoEncryption()))
+
+    except FileNotFoundError as err:
+        print(f'Error: {err}')
         sys.exit(1)
 
 if __name__ == '__main__':

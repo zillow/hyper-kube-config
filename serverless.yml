@@ -47,6 +47,13 @@ functions:
           path: clusters/add
           method: post
           private: true
+  add_ca_key:
+    handler: add_ca_key.add_ca_key
+    events:
+      - http:
+          path: clusters/add-ca-key
+          method: post
+          private: true
   remove_cluster:
     handler: remove_cluster.remove_cluster
     events:
