@@ -29,6 +29,8 @@ def list(ctx):
             headers=ctx.obj['headers']
         )
         pprint(r.json())
+        if r.status_code != 200:
+            sys.exit(1)
     except requests.exceptions.RequestException as err:
         print(f'Request error: {err}')
 
@@ -47,6 +49,8 @@ def add(ctx, k8s_config):
             data=k8s_cfg
         )
         pprint(r.json())
+        if r.status_code == 404:
+            sys.exit(1)
     except requests.exceptions.RequestException as err:
         print(f'Request error: {err}')
 
@@ -63,6 +67,8 @@ def remove(ctx, cluster_to_remove):
             data=json.dumps({ "cluster_name": cluster_to_remove})
         )
         pprint(r.json())
+        if r.status_code == 404:
+            sys.exit(1)
     except requests.exceptions.RequestException as err:
         print(f'Request error: {err}')
 
@@ -86,6 +92,8 @@ def get(ctx, cluster):
             headers=ctx.obj['headers']
         )
         pprint(r.json())
+        if r.status_code == 404:
+            sys.exit(1)
     except requests.exceptions.RequestException as err:
         print(f'Request error: {err}')
 
