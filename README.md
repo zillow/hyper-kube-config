@@ -53,6 +53,7 @@ kubectl hyperkube -c ~/hyperkube-config.yaml list
 * [HTTPie](https://httpie.org/) - recommended for API client
 * [serverless-python-requirements](https://www.npmjs.com/package/serverless-python-requirements) plugin. Uses Docker and Pip to package a newer vesion of Boto3 for AWS Lambda function use. AWS Lambda boto3 version by default doesn't have AWS Secrets Manager support for tags.
 * [click](https://click.palletsprojects.com/en/7.x/) - for hyperkube kubectl plugin
+* [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) - version 1.12 or higher recommended for stable plugin support.
 
 ### Deploying Serverless API
 
