@@ -102,7 +102,7 @@ def _load_config(config):
     """Loads yaml config to dict object"""
     try:
         with open(config, 'r') as ymlfile:
-            cfg = yaml.load(ymlfile)
+            cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
             return cfg
     except FileNotFoundError as err:
         sys.exit(1)
