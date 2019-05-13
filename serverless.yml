@@ -47,12 +47,26 @@ functions:
           path: clusters/add
           method: post
           private: true
+  add_pem:
+    handler: pem.add_pem
+    events:
+      - http:
+          path: clusters/add-pem
+          method: post
+          private: true
   remove_cluster:
     handler: remove_cluster.remove_cluster
     events:
       - http:
           path: clusters/remove
           method: post
+          private: true
+  remove_pem:
+    handler: pem.remove_pem
+    events:
+      - http:
+          path: clusters/remove-pem
+          method: get
           private: true
   get_k8s_config_object:
     handler: get_k8_config.get_k8_config
@@ -61,11 +75,46 @@ functions:
           path: clusters/get-k8-config
           method: get
           private: true
+  get_pem:
+    handler: pem.get_pem
+    events:
+      - http:
+          path: clusters/get-pem
+          method: get
+          private: true
   list_clusters:
     handler: list_clusters.list_clusters
     events:
       - http:
           path: clusters/list
+          method: get
+          private: true
+  cluster_status:
+    handler: cluster_status.cluster_status 
+    events:
+      - http:
+          path: clusters/cluster-status
+          method: get
+          private: true
+  clusters_per_environment:
+    handler: cluster_status.clusters_per_environment
+    events:
+      - http:
+          path: clusters/clusters-per-environment
+          method: get
+          private: true
+  set_cluster_environment:
+    handler: cluster_status.set_cluster_environment
+    events:
+      - http:
+          path: clusters/set-cluster-environment
+          method: get
+          private: true
+  set_cluster_status:
+    handler: cluster_status.set_cluster_status
+    events:
+      - http:
+          path: clusters/set-cluster-status
           method: get
           private: true
           

@@ -46,6 +46,34 @@ kubectl hyperkube -c ~/hyperkube.yaml get \
 kubectl hyperkube -c ~/hyperkube-config.yaml list
 ```
 
+## Store and Associate PEM with Cluster
+
+#### Store Pem
+
+```bash
+kubectl hyperkube -c ~/hyperkube-config.yaml add-pem --pem ~/.ssh/my-cluster.pem 
+```
+
+#### Get Stored Pem
+
+```bash
+kubectl hyperkube -c ~/hyperkube-config.yaml get-pem --cluster my-cluster.net
+```
+
+## Set Cluster Status and/or Environment References
+
+```bash
+# Set arbitrary status string and environment reference for given cluster
+kubectl hyperkube -c ~/hyperkube-config.yaml set-cluster-status --cluster my-cluster.net --status active --environment stage
+```
+
+## Get Cluster Status for Environment
+
+```bash
+# Returns list of clusters that are active for prod environment
+kubectl hyperkubetest -c ~/hyperkube-stage.yaml get-cluster-status --status active --environment prod
+```
+
 ## Requirements
 
 * [Serverless](https://serverless.com/) - Serverless Framework

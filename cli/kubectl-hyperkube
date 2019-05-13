@@ -98,6 +98,98 @@ def get(ctx, cluster):
         print(f'Request error: {err}')
 
 
+@cli.command()
+@click.option('--cluster', '-g')
+@click.pass_context
+def get_pem(ctx, cluster):
+    """Get the pem file for a specific cluster"""
+    
+    try:
+        r = requests.get(
+            f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/get-pem?cluster_name={cluster}',
+            headers=ctx.obj['headers']
+        )
+        pprint(r.text)
+        if r.status_code == 404:
+            sys.exit(1)
+    except requests.exceptions.RequestException as err:
+        print(f'Request error: {err}')
+
+@cli.command()
+@click.option('--cluster', '-g', required=True)
+@click.option('--pem', '-p', required=True)
+@click.pass_context
+def add_pem(ctx, cluster, pem):
+    """Add a pem file for a specific cluster"""
+
+    pem_data = _load_pem(pem) 
+
+    try:
+        r = requests.post(
+            f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/add-pem?cluster_name={cluster}',
+            headers=ctx.obj['headers'],
+            data=pem_data
+        )
+        pprint(r.json())
+        if r.status_code == 404:
+            sys.exit(1)
+    except requests.exceptions.RequestException as err:
+        print(f'Request error: {err}')
+
+@cli.command()
+@click.option('--environment', '-g')
+@click.option('--status', '-s')
+@click.option('--cluster', '-g', required=True)
+@click.pass_context
+def set_cluster_status(ctx, environment, status, cluster):
+    """Set cluster status, you are able to update both environment or status"""
+
+    if environment:
+        try:
+            print(f'Setting cluster environment to {environment}')
+            r = requests.get(
+                f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/set-cluster-environment?cluster_name={cluster}&environment={environment}',
+                headers=ctx.obj['headers']
+            )
+            if r.status_code == 404:
+                sys.exit(1)
+        except requests.exceptions.RequestException as err:
+            print(f'Request error: {err}')
+    if status:
+        try:
+            print(f'Setting cluster status {status}')
+            r = requests.get(
+                f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/set-cluster-status?cluster_name={cluster}&cluster_status={status}',
+                headers=ctx.obj['headers']
+            )
+            if r.status_code == 404:
+                sys.exit(1)
+        except requests.exceptions.RequestException as err:
+            print(f'Request error: {err}')
+
+    if not status and not environment:
+        print(f'Please provide either --environment or --status flag for updating cluster')
+
+
+@cli.command()
+@click.option('--environment', '-g', required=True)
+@click.option('--status', '-s', required=True)
+@click.pass_context
+def get_cluster_status(ctx, environment, status):
+    """Get clusters of a given status in a particular environment"""
+
+    try:
+        r = requests.get(
+            f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/cluster-status?cluster_status={status}&environment={environment}',
+            headers=ctx.obj['headers']
+        )
+        pprint(r.json())
+        if r.status_code == 404:
+            sys.exit(1)
+    except requests.exceptions.RequestException as err:
+        print(f'Request error: {err}')
+
+
 def _load_config(config):
     """Loads yaml config to dict object"""
     try:
@@ -106,6 +198,16 @@ def _load_config(config):
             return cfg
     except FileNotFoundError as err:
         sys.exit(1)
+
+
+def _load_pem(pem):
+    """Open and return a pem file as object"""
+    try:
+        with open(pem, 'r') as pemfile:
+            return pemfile.read()
+    except FileNotFoundError as err:
+        sys.exit(1)
+
 
 if __name__ == '__main__':
     cli(obj={})
