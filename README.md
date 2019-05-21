@@ -71,7 +71,7 @@ kubectl hyperkube -c ~/hyperkube-config.yaml set-cluster-status --cluster my-clu
 
 ```bash
 # Returns list of clusters that are active for prod environment
-kubectl hyperkubetest -c ~/hyperkube-stage.yaml get-cluster-status --status active --environment prod
+kubectl hyperkube -c ~/hyperkube-config.yaml get-cluster-status --status active --environment prod
 ```
 
 ## Requirements
