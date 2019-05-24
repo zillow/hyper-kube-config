@@ -119,7 +119,7 @@ def remove(ctx, cluster_to_remove):
 @click.option('--cluster', '-g', multiple=True)
 @click.pass_context
 def get(ctx, cluster):
-    """Retrieve and concat one or more cluster configs into one config, set context to first cluster"""
+    """Retrieve and concatenate one or more cluster configs into one config, set context to first cluster"""
 
     param_string = ""
     for c in cluster:
@@ -131,6 +131,23 @@ def get(ctx, cluster):
     try:
         r = requests.get(
             f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/get-k8-config?{param_string}',
+            headers=ctx.obj['headers']
+        )
+        pprint(r.json())
+        if r.status_code == 404:
+            sys.exit(1)
+    except requests.exceptions.RequestException as err:
+        print(f'Request error: {err}')
+
+
+@cli.command()
+@click.pass_context
+def get_all(ctx, cluster):
+    """Retrieve and concatenate all cluster configs into one config"""
+
+    try:
+        r = requests.get(
+            f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/get-all-k8-configs',
             headers=ctx.obj['headers']
         )
         pprint(r.json())
