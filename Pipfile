@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+boto3 = "==1.9.22"
+cryptography = "==2.4.2"
+click = "*"
+pyyaml = "*"
+requests = "*"
+
+[dev-packages]
+pylint = "*"
+pytest = "*"
+
+[requires]
+python_version = "3.7"
+
+[pipenv]
+allow_prereleases = true
