@@ -1,7 +1,7 @@
 {
   "name": "hyper-kube-config",
   "description": "",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "dependencies": {},
   "devDependencies": {
     "serverless-python-requirements": "^4.2.1"

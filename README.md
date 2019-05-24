@@ -29,15 +29,21 @@ kubectl hyperkube -c ~/hyperkube.yaml remove --cluster-to-remove 'k8s-cluster-ex
 ## Get user creds
 
 ```bash
-kubectl hyperkube -c ~/hyperkube.yaml get --cluster cloud-infra.cloud
+# for single cluster
+kubectl hyperkube -c ~/hyperkube.yaml get --cluster cloud-infra.cloud > ~/.kube/config
 ```
 
-## Get user creds multiple clusters
+## Get user creds multiple clusters into one Kube config
 ```bash
 kubectl hyperkube -c ~/hyperkube.yaml get \
   --cluster cloud-infra.cloud \
   --cluster bar-cluster.cloud \
-  --cluster baz-cluster.com 
+  --cluster baz-cluster.com  > ~/.kube/config
+```
+
+## Get creds for all clusters into one Kube config
+```bash
+kubectl hyperkube -c ~/hyperkube.yaml get-all > ~/.kube/config
 ```
 
 ## List clusters

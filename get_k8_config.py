@@ -8,22 +8,33 @@ CLUSTER_TABLE_NAME = os.environ['DYNAMODB_TABLE_K8_CLUSTERS']
 CLUSTER_TABLE = DYNAMODB.Table(CLUSTER_TABLE_NAME)
 SECRETS_CLIENT = boto3.client('secretsmanager')
 
+config = {
+    "apiVersion": "v1",
+    "kind": "Config",
+    "preferences": {},
+    "clusters": [],
+    "users": [],
+    "contexts": [],
+    "current-context": ""
+}
+
+def get_all_k8_configs(event, context):
+    """Generate k8 config object for all tracked clusters"""
+
+    # /get_all_k8s_configs
+    clusters = _cluster_list()
+    _generate_cluster_config(clusters)
+
 
 def get_k8_config(event, context):
     """Generate k8 config object from list of clusters as query input"""
     
     # /get_k8_config?cloud-infra.cloud&cloud-infra-2.net
     clusters = event['queryStringParameters']
-    config = {
-        "apiVersion": "v1",
-        "kind": "Config",
-        "preferences": {},
-        "clusters": [],
-        "users": [],
-        "contexts": [],
-        "current-context": ""
-    }
+    _generate_cluster_config(clusters)
 
+
+def _generate_cluster_config(clusters):
     for cluster in clusters:
         
         if validate_unique_cluster_name(cluster, CLUSTER_TABLE) is not None:
@@ -73,3 +84,14 @@ def get_k8_config(event, context):
         "statusCode": 200,
         "body": json.dumps(config)
     }
+
+def _cluster_list():
+    """Scan for all cluster ids and return list"""
+
+    clusters = []
+    cluster_items = CLUSTER_TABLE.scan()
+
+    for cluster in cluster_items['Items']:
+        clusters.append(cluster['id'])
+    
+    return clusters

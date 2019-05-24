@@ -75,6 +75,13 @@ functions:
           path: clusters/get-k8-config
           method: get
           private: true
+  get_all_k8s_config:
+    handler: get_k8_config.get_all_k8_configs
+    events:
+      - http:
+          path: clusters/get-all-k8-configs
+          method: get
+          private: true
   get_pem:
     handler: pem.get_pem
     events:
