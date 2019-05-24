@@ -60,7 +60,7 @@ def add(ctx, k8s_config):
 @click.option('--ca-key', '-a', required=True)
 @click.option('--cluster-name', '-n', required=True)
 @click.pass_context
-def key(ctx, cluster_name, ca_key):
+def add_ca_key(ctx, cluster_name, ca_key):
     """Add cluster CA key to hyper-kube-config"""
     
     key = json.dumps(_load_ca_key(ca_key))
@@ -76,25 +76,6 @@ def key(ctx, cluster_name, ca_key):
     except requests.exceptions.RequestException as err:
         print(f'Request error: {err}')
 
-@cli.command()
-@click.option('--ca-key', '-a', required=True)
-@click.option('--cluster-name', '-n', required=True)
-@click.pass_context
-def key(ctx, cluster_name, ca_key):
-    """Add cluster CA key to hyper-kube-config"""
-    
-    key = json.dumps(_load_ca_key(ca_key))
-    post = { "cluster_name": cluster_name, "ca_key": key }
-
-    try:
-        r = requests.post(
-            f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/add-ca-key',
-            headers=ctx.obj['headers'],
-            data=post
-        )
-        pprint(r.json())
-    except requests.exceptions.RequestException as err:
-        print(f'Request error: {err}')
 
 @cli.command()
 @click.option('--cluster-to-remove', '-k', required=True)
