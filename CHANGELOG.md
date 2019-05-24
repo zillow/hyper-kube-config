@@ -4,6 +4,14 @@ This file is used to list changes made in each version of hyper-kube-config.
 
 ## unreleased
 
+## 0.1.2 (2019-05-24)
+- [Zane Williamson]
+  - Adding support for adding CA key for k8s cluster
+
+## 0.1.1 (2019-05-23)
+- [Zane Williamson]
+  - Adding get-all command: retrieve and concatenate all cluster configs into one config
+
 ## 0.1.0 (2019-05-14)
 - [Zane Williamson] 
   - Adding support to store and associate Pems to a cluster
