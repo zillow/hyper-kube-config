@@ -52,7 +52,19 @@ functions:
     events:
       - http:
           path: clusters/add-pem
+  add_ca_key:
+    handler: ca_key.add_ca_key
+    events:
+      - http:
+          path: clusters/add-ca-key
           method: post
+          private: true
+  remove_ca_key:
+    handler: ca_key.remove_ca_key
+    events:
+      - http:
+          path: clusters/remove-ca-key
+          method: get
           private: true
   remove_cluster:
     handler: remove_cluster.remove_cluster

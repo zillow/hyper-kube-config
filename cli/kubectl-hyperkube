@@ -8,6 +8,7 @@ import yaml
 from pprint import pprint
 import json
 
+
 @click.group()
 @click.option('--config', '-c', required=True, default="~/hyperkube-config.yaml")
 @click.pass_context
@@ -53,6 +54,46 @@ def add(ctx, k8s_config):
             sys.exit(1)
     except requests.exceptions.RequestException as err:
         print(f'Request error: {err}')
+
+
+@cli.command()
+@click.option('--ca-key', '-a', required=True)
+@click.option('--cluster-name', '-n', required=True)
+@click.pass_context
+def add_ca_key(ctx, cluster_name, ca_key):
+    """Add cluster CA key to hyper-kube-config"""
+    
+    key = _load_pem(ca_key)
+    post = { "cluster_name": cluster_name, "ca_key": key }
+
+    try:
+        r = requests.post(
+            f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/add-ca-key',
+            headers=ctx.obj['headers'],
+            data=post
+        )
+        pprint(r.json())
+    except requests.exceptions.RequestException as err:
+        print(f'Request error: {err}')
+
+
+@cli.command()
+@click.option('--cluster-name', '-n', required=True)
+@click.pass_context
+def remove_ca_key(ctx, cluster_name):
+    """Remove specified cluster CA key from hyper-kube-config"""
+    
+    try:
+        r = requests.get(
+            f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/remove-ca-key?{cluster_name}',
+            headers=ctx.obj['headers']
+        )
+        pprint(r.json())
+        if r.status_code == 404:
+            sys.exit(1)
+    except requests.exceptions.RequestException as err:
+        print(f'Request error: {err}')
+
 
 @cli.command()
 @click.option('--cluster-to-remove', '-k', required=True)
@@ -214,6 +255,7 @@ def _load_config(config):
             cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
             return cfg
     except FileNotFoundError as err:
+        print(f'Error: {err}')
         sys.exit(1)
 
 

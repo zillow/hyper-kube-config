@@ -52,18 +52,25 @@ kubectl hyperkube -c ~/hyperkube.yaml get-all > ~/.kube/config
 kubectl hyperkube -c ~/hyperkube-config.yaml list
 ```
 
-## Store and Associate PEM with Cluster
+## Store and Associate SSH PEM and CA private key with Cluster
 
-#### Store Pem
+#### Store SSH Pem
 
 ```bash
 kubectl hyperkube -c ~/hyperkube-config.yaml add-pem --pem ~/.ssh/my-cluster.pem 
 ```
 
-#### Get Stored Pem
+#### Get Stored SSH Pem
 
 ```bash
 kubectl hyperkube -c ~/hyperkube-config.yaml get-pem --cluster my-cluster.net
+```
+
+
+#### Store Add CA Private Key
+
+```bash
+kubectl hyperkube -c ~/hyperkube-config.yaml add-ca-key --ca-key ca-key-file.key --cluser my-cluster.net
 ```
 
 ## Set Cluster Status and/or Environment References

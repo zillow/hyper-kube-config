@@ -19,13 +19,13 @@ URL = 'https://github.com/silvermullet/hyper-kube-config'
 EMAIL = 'zane@ugh.cloud'
 AUTHOR = 'Zane Williamson'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = "0.1.1"
+VERSION = "0.1.2"
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    'click',
-    'requests',
-    'pyyaml'
+    'click==7.0',
+    'requests==v2.22.0',
+    'pyyaml==5.1'
 ]
 
 # The rest you shouldn't have to touch too much :)
