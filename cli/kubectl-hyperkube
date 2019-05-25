@@ -7,8 +7,7 @@ import subprocess
 import yaml
 from pprint import pprint
 import json
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.backends import default_backend
+
 
 @click.group()
 @click.option('--config', '-c', required=True, default="~/hyperkube-config.yaml")
@@ -56,6 +55,7 @@ def add(ctx, k8s_config):
     except requests.exceptions.RequestException as err:
         print(f'Request error: {err}')
 
+
 @cli.command()
 @click.option('--ca-key', '-a', required=True)
 @click.option('--cluster-name', '-n', required=True)
@@ -63,7 +63,7 @@ def add(ctx, k8s_config):
 def add_ca_key(ctx, cluster_name, ca_key):
     """Add cluster CA key to hyper-kube-config"""
     
-    key = json.dumps(_load_ca_key(ca_key))
+    key = _load_pem(ca_key)
     post = { "cluster_name": cluster_name, "ca_key": key }
 
     try:
@@ -236,25 +236,6 @@ def _load_config(config):
         with open(config, 'r') as ymlfile:
             cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
             return cfg
-    except FileNotFoundError as err:
-        print(f'Error: {err}')
-        sys.exit(1)
-
-def _load_ca_key(ca_key):
-    """Loads ca key in pem format into crypto object"""
-    try:
-        with open(ca_key, 'r') as ca_key_file:
-            ca_key = ca_key_file.private_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.TraditionalOpenSSL,
-                encryption_algorithm=serialization.BestAvailableEncryption(b"password")
-            )
-
-            return bytes.decode(ca_key.private_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.TraditionalOpenSSL,
-                encryption_algorithm=serialization.NoEncryption()))
-
     except FileNotFoundError as err:
         print(f'Error: {err}')
         sys.exit(1)
