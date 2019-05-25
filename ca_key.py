@@ -54,3 +54,31 @@ def add_ca_key(event, context):
     except ClientError as err:
         if err.response['Error']['Code'] == 'EntityAlreadyExists':
             print(f'CA key already exists in AWS Secrets Manager: {err}')
+
+
+def remove_ca_key(event, context):
+    """Remove specified CA key"""
+
+    cluster_name = event['body']['cluster_name']
+
+    try:
+        print(f'Deleting hyper-kube-config-{cluster_name}-ca-key')
+        SECRETS_CLIENT.delete_secret(
+            SecretId=f'hyper-kube-config-{cluster_name}-ca-key',
+            ForceDeleteWithoutRecovery=True
+        )
+
+        return {
+            "statusCode": 200,
+            "body": {"message": f'Deleted hyper-kube-config-{cluster_name}-ca-key'},
+        }
+
+    except ClientError as e:
+        return {
+            "statusCode": 503,
+            "body": json.dumps(
+                {"message": f'Failed to get ca key associated to {cluster_name}: {e}'}
+            )
+        }
+ 
+

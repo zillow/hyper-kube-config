@@ -78,6 +78,24 @@ def add_ca_key(ctx, cluster_name, ca_key):
 
 
 @cli.command()
+@click.option('--cluster-name', '-n', required=True)
+@click.pass_context
+def remove_ca_key(ctx, cluster_name):
+    """Remove specified cluster CA key from hyper-kube-config"""
+    
+    try:
+        r = requests.get(
+            f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/remove-ca-key?{cluster_name}',
+            headers=ctx.obj['headers']
+        )
+        pprint(r.json())
+        if r.status_code == 404:
+            sys.exit(1)
+    except requests.exceptions.RequestException as err:
+        print(f'Request error: {err}')
+
+
+@cli.command()
 @click.option('--cluster-to-remove', '-k', required=True)
 @click.pass_context
 def remove(ctx, cluster_to_remove):
