@@ -15,6 +15,9 @@ provider:
   apiKeys:
     - ${self:service}-${opt:stage, self:provider.stage}-key
 
+  iamManagedPolicies:
+    - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -28,6 +31,10 @@ provider:
       Action:
         - "dynamodb:*"
       Resource: "arn:aws:dynamodb:*:*:table/hyper-kube-config*"
+    - Effect: "Allow"
+      Action:
+        - "logs:CreateLogGroup"
+      Resource: "*"
 
   environment:
     DYNAMODB_TABLE_K8_CLUSTERS: ${self:service}-${opt:stage, self:provider.stage}-clusters
@@ -52,6 +59,8 @@ functions:
     events:
       - http:
           path: clusters/add-pem
+          method: post
+          private: true
   add_ca_key:
     handler: ca_key.add_ca_key
     events:

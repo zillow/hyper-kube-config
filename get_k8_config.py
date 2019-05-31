@@ -8,33 +8,38 @@ CLUSTER_TABLE_NAME = os.environ['DYNAMODB_TABLE_K8_CLUSTERS']
 CLUSTER_TABLE = DYNAMODB.Table(CLUSTER_TABLE_NAME)
 SECRETS_CLIENT = boto3.client('secretsmanager')
 
-config = {
-    "apiVersion": "v1",
-    "kind": "Config",
-    "preferences": {},
-    "clusters": [],
-    "users": [],
-    "contexts": [],
-    "current-context": ""
-}
-
 def get_all_k8_configs(event, context):
     """Generate k8 config object for all tracked clusters"""
 
-    # /get_all_k8s_configs
+    # /get-all-k8s-configs
     clusters = _cluster_list()
-    _generate_cluster_config(clusters)
+    results = _generate_cluster_config(clusters)
+
+    return results
 
 
 def get_k8_config(event, context):
     """Generate k8 config object from list of clusters as query input"""
     
-    # /get_k8_config?cloud-infra.cloud&cloud-infra-2.net
+    # /get-k8-config?cloud-infra.cloud&cloud-infra-2.net
     clusters = event['queryStringParameters']
-    _generate_cluster_config(clusters)
+    results = _generate_cluster_config(clusters)
 
+    return results
+    
 
 def _generate_cluster_config(clusters):
+   
+    config = {
+        "apiVersion": "v1",
+        "kind": "Config",
+        "preferences": {},
+        "clusters": [],
+        "users": [],
+        "contexts": [],
+        "current-context": ""
+    }
+
     for cluster in clusters:
         
         if validate_unique_cluster_name(cluster, CLUSTER_TABLE) is not None:
@@ -53,6 +58,7 @@ def _generate_cluster_config(clusters):
 
             for user in cluster_item['users_config']:
                 for user_key, secret in user['user'].items():
+                    print(f'getting secret: {secret}')
                     secret_response = SECRETS_CLIENT.get_secret_value(
                         SecretId=secret
                     ) 
@@ -93,5 +99,7 @@ def _cluster_list():
 
     for cluster in cluster_items['Items']:
         clusters.append(cluster['id'])
+
+    print(f'tracked clusters: {clusters}')
     
     return clusters
