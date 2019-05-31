@@ -42,6 +42,7 @@ def add(ctx, k8s_config):
     """Add cluster to hyper-kube-config"""
     
     k8s_cfg = json.dumps(_load_config(k8s_config))
+    print(k8s_cfg)
 
     try:
         r = requests.post(
@@ -141,7 +142,7 @@ def get(ctx, cluster):
 
 @cli.command()
 @click.pass_context
-def get_all(ctx, cluster):
+def get_all(ctx):
     """Retrieve and concatenate all cluster configs into one config"""
 
     try:
@@ -265,6 +266,7 @@ def _load_pem(pem):
         with open(pem, 'r') as pemfile:
             return pemfile.read()
     except FileNotFoundError as err:
+        print(f'Provided pem not found: {pem}')
         sys.exit(1)
 
 
