@@ -7,10 +7,10 @@ import subprocess
 import yaml
 from pprint import pprint
 import json
-
+from pathlib import Path
 
 @click.group()
-@click.option('--config', '-c', required=True, default="~/hyperkube-config.yaml")
+@click.option('--config', '-c', required=False, default=str(Path.home()) + "/hyperkube-config.yaml")
 @click.pass_context
 def cli(ctx, config):
     ctx.ensure_object(dict)
