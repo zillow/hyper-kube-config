@@ -6,10 +6,9 @@
 
 hyper-kube-config - Provides a secure [Serverless](https://serverless.com/) API to store and retrieve [Kubernetes cluster config credentials](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/). hyper-kube-config leverages [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/index.html) for storing credential information. Included is a [kubectl plugin](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/) to interface with hyperkube API. 
 
-It requires a configuration file to be located in `~/.hyperkube-config.yaml` location. See [hyperkube-config.yaml.example](hyperkube-config.yaml.example) for layout.
+It requires a configuration file. See [hyperkube-config.yaml.example](hyperkube-config.yaml.example) for layout.
 
 ![hyper-kube-config](https://user-images.githubusercontent.com/538171/46702337-8edc2780-cbd7-11e8-8ba5-dbbe9916708a.png)
-
 
 
 ## Install hyperkube kubectl plugin
@@ -20,12 +19,21 @@ pip3 install hyper-kube-config
 
 ## Setup `~/.hyperkube-config.yaml` file
 
+The default locations for the config file is `~/.hyperkube-config.yaml`. You can also place the config file at a different location and pass the location as a command line option `-c <hyper-kube-config-location>` or `--config <hyper-kube-config-location>`
+
+
 ## Post cluster and creds to hyperkube store
+
 ```bash
+# with config file in default location ~/.hyperkube-config.yaml
 kubectl hyperkube add --k8s-config ~/.kube/config
+# with config file in default location ~/location2/.hyperkube-config.yaml
+# kubectl hyperkube -c ~/location2/.hyperkube-config.yaml add --k8s-config ~/.kube/config
+# kubectl hyperkube --config ~/location2/.hyperkube-config.yaml add --k8s-config ~/.kube/config
 ```
 
 ## Remove cluster and creds
+
 ```bash
 kubectl hyperkube remove --cluster-to-remove 'k8s-cluster-example.cloud' 
 ```
@@ -38,6 +46,7 @@ kubectl hyperkube get --cluster cloud-infra.cloud > ~/.kube/config
 ```
 
 ## Get user creds multiple clusters into one Kube config
+
 ```bash
 kubectl hyperkube get \
   --cluster cloud-infra.cloud \
@@ -46,6 +55,7 @@ kubectl hyperkube get \
 ```
 
 ## Get creds for all clusters into one Kube config
+
 ```bash
 kubectl hyperkube get-all > ~/.kube/config
 ```
