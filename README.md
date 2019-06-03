@@ -4,7 +4,9 @@
 
 [![PyPI version](https://badge.fury.io/py/hyper-kube-config.svg)](https://badge.fury.io/py/hyper-kube-config)
 
-hyper-kube-config - Provides a secure [Serverless](https://serverless.com/) API to store and retrieve [Kubernetes cluster config credentials](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/). hyper-kube-config leverages [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/index.html) for storing credential information. Included is a [kubectl plugin](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/) to interface with hyperkube API. It just requires a configuration file. See hyperkube.yaml.example for layout.
+hyper-kube-config - Provides a secure [Serverless](https://serverless.com/) API to store and retrieve [Kubernetes cluster config credentials](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/). hyper-kube-config leverages [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/index.html) for storing credential information. Included is a [kubectl plugin](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/) to interface with hyperkube API. 
+
+It requires a configuration file to be located in `~/.hyperkube-config.yaml` location. See [hyperkube-config.yaml.example](hyperkube-config.yaml.example) for layout.
 
 ![hyper-kube-config](https://user-images.githubusercontent.com/538171/46702337-8edc2780-cbd7-11e8-8ba5-dbbe9916708a.png)
 
@@ -16,26 +18,28 @@ hyper-kube-config - Provides a secure [Serverless](https://serverless.com/) API 
 pip3 install hyper-kube-config 
 ```
 
+## Setup `~/.hyperkube-config.yaml` file
+
 ## Post cluster and creds to hyperkube store
 ```bash
-kubectl hyperkube -c ~/hyperkube.yaml add --k8s-config ~/.kube/config
+kubectl hyperkube add --k8s-config ~/.kube/config
 ```
 
 ## Remove cluster and creds
 ```bash
-kubectl hyperkube -c ~/hyperkube.yaml remove --cluster-to-remove 'k8s-cluster-example.cloud' 
+kubectl hyperkube remove --cluster-to-remove 'k8s-cluster-example.cloud' 
 ```
 
 ## Get user creds
 
 ```bash
 # for single cluster
-kubectl hyperkube -c ~/hyperkube.yaml get --cluster cloud-infra.cloud > ~/.kube/config
+kubectl hyperkube get --cluster cloud-infra.cloud > ~/.kube/config
 ```
 
 ## Get user creds multiple clusters into one Kube config
 ```bash
-kubectl hyperkube -c ~/hyperkube.yaml get \
+kubectl hyperkube get \
   --cluster cloud-infra.cloud \
   --cluster bar-cluster.cloud \
   --cluster baz-cluster.com  > ~/.kube/config
@@ -43,13 +47,13 @@ kubectl hyperkube -c ~/hyperkube.yaml get \
 
 ## Get creds for all clusters into one Kube config
 ```bash
-kubectl hyperkube -c ~/hyperkube.yaml get-all > ~/.kube/config
+kubectl hyperkube get-all > ~/.kube/config
 ```
 
 ## List clusters
 
 ```bash
-kubectl hyperkube -c ~/hyperkube-config.yaml list
+kubectl hyperkube list
 ```
 
 ## Store and Associate SSH PEM and CA private key with Cluster
@@ -57,34 +61,34 @@ kubectl hyperkube -c ~/hyperkube-config.yaml list
 #### Store SSH Pem
 
 ```bash
-kubectl hyperkube -c ~/hyperkube-config.yaml add-pem --pem ~/.ssh/my-cluster.pem 
+kubectl hyperkube add-pem --pem ~/.ssh/my-cluster.pem 
 ```
 
 #### Get Stored SSH Pem
 
 ```bash
-kubectl hyperkube -c ~/hyperkube-config.yaml get-pem --cluster my-cluster.net
+kubectl hyperkube get-pem --cluster my-cluster.net
 ```
 
 
 #### Store Add CA Private Key
 
 ```bash
-kubectl hyperkube -c ~/hyperkube-config.yaml add-ca-key --ca-key ca-key-file.key --cluser my-cluster.net
+kubectl hyperkube add-ca-key --ca-key ca-key-file.key --cluser my-cluster.net
 ```
 
 ## Set Cluster Status and/or Environment References
 
 ```bash
 # Set arbitrary status string and environment reference for given cluster
-kubectl hyperkube -c ~/hyperkube-config.yaml set-cluster-status --cluster my-cluster.net --status active --environment stage
+kubectl hyperkube set-cluster-status --cluster my-cluster.net --status active --environment stage
 ```
 
 ## Get Cluster Status for Environment
 
 ```bash
 # Returns list of clusters that are active for prod environment
-kubectl hyperkube -c ~/hyperkube-config.yaml get-cluster-status --status active --environment prod
+kubectl hyperkube get-cluster-status --status active --environment prod
 ```
 
 ## Requirements

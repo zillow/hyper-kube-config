@@ -4,6 +4,14 @@ This file is used to list changes made in each version of hyper-kube-config.
 
 ## unreleased
 
+## 0.1.4 (2019-06-03)
+- [Swarup Donepudi]
+  - Fix reading from default config
+
+## 0.1.3 (2019-05-31)
+- [Zane Williamson]
+  - Fixing get and get all commands
+
 ## 0.1.2 (2019-05-24)
 - [Zane Williamson]
   - Adding support for adding CA key for k8s cluster
