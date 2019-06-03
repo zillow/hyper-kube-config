@@ -6,6 +6,8 @@
 
 hyper-kube-config - Provides a secure [Serverless](https://serverless.com/) API to store and retrieve [Kubernetes cluster config credentials](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/). hyper-kube-config leverages [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/index.html) for storing credential information. Included is a [kubectl plugin](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/) to interface with hyperkube API. 
 
+You can also set cluster's status and retrieve this information. Useful in CI/CD pipelines when trying to pull access to particular cluters without needing to know their names, just their environments. 
+
 It requires a configuration file. See [hyperkube-config.yaml.example](hyperkube-config.yaml.example) for layout.
 
 ![hyper-kube-config](https://user-images.githubusercontent.com/538171/46702337-8edc2780-cbd7-11e8-8ba5-dbbe9916708a.png)
@@ -25,11 +27,7 @@ The default locations for the config file is `~/.hyperkube-config.yaml`. You can
 ## Post cluster and creds to hyperkube store
 
 ```bash
-# with config file in default location ~/.hyperkube-config.yaml
 kubectl hyperkube add --k8s-config ~/.kube/config
-# with config file in default location ~/location2/.hyperkube-config.yaml
-# kubectl hyperkube -c ~/location2/.hyperkube-config.yaml add --k8s-config ~/.kube/config
-# kubectl hyperkube --config ~/location2/.hyperkube-config.yaml add --k8s-config ~/.kube/config
 ```
 
 ## Remove cluster and creds
@@ -105,7 +103,6 @@ kubectl hyperkube get-cluster-status --status active --environment prod
 
 * [Serverless](https://serverless.com/) - Serverless Framework
 * [Docker](https://docker.com) - For serverless deploy
-* [HTTPie](https://httpie.org/) - recommended for API client
 * [serverless-python-requirements](https://www.npmjs.com/package/serverless-python-requirements) plugin. Uses Docker and Pip to package a newer vesion of Boto3 for AWS Lambda function use. AWS Lambda boto3 version by default doesn't have AWS Secrets Manager support for tags.
 * [click](https://click.palletsprojects.com/en/7.x/) - for hyperkube kubectl plugin
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) - version 1.12 or higher recommended for stable plugin support.
