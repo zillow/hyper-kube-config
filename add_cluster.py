@@ -20,7 +20,10 @@ def add_cluster(event, context):
         try:
             cluster_name = cluster['name']
             cluster_server = cluster['cluster']['server']
-            cluster_authority = cluster['cluster']['certificate-authority-data']
+            if 'certificate-authority-data' in cluster['cluster']:
+                cluster_authority = cluster['cluster']['certificate-authority-data']
+            else:
+                cluster_authority = "NA"
         except KeyError as err:
             print(f'Invalid cluster config: {err}')
             raise err

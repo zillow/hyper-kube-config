@@ -47,14 +47,23 @@ def _generate_cluster_config(clusters):
             cluster_item = CLUSTER_TABLE.get_item(Key={"id": cluster})
             cluster_item = cluster_item['Item']
             
-            config["clusters"].append(
-                {"cluster": 
-                    { "certificate-authority-data": cluster_item['certificate-authority-data'], 
-                      "server": cluster_item['server']
-                    }, 
-                    "name": cluster_item['id']
-                }
-            )
+            # Add certificate-authority-data if available, this is optional at the time of adding config
+            if cluster_item['certificate-authority-data'] != "NA":
+                config["clusters"].append(
+                    {"cluster": 
+                        { "certificate-authority-data": cluster_item['certificate-authority-data'], 
+                        "server": cluster_item['server']
+                        }, 
+                        "name": cluster_item['id']
+                    }
+                )
+            else:
+                config["clusters"].append(
+                    {"cluster": 
+                        {"server": cluster_item['server']}, 
+                        "name": cluster_item['id']
+                    }
+                )
 
             for user in cluster_item['users_config']:
                 for user_key, secret in user['user'].items():

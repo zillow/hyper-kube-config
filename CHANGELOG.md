@@ -4,6 +4,11 @@ This file is used to list changes made in each version of hyper-kube-config.
 
 ## unreleased
 
+## 0.1.5 (2019-09-16)
+- [Zane Williamson]
+  - Allow cluster-authority-data to be an optional input
+  - updating dependencies 
+
 ## 0.1.4 (2019-06-03)
 - [Swarup Donepudi]
   - Fix reading from default config

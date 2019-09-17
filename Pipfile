@@ -13,6 +13,7 @@ requests = "==v2.22.0"
 [dev-packages]
 pylint = "*"
 pytest = "*"
+ipython = "*"
 
 [requires]
 python_version = "3.7"
