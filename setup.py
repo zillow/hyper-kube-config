@@ -10,9 +10,7 @@ from setuptools import find_packages, setup, Command
 
 # Package meta-data.
 NAME = 'hyper-kube-config'
-DESCRIPTION = """H Y P E R K U B E - A secure Serverless API and kubectl plugin
-that stores and retrieve Kubernetes cluster credentials.
-Hyperkube leverages AWS Secrets Manager for storing credential information."""
+DESCRIPTION = """H Y P E R K U B E - A secure Serverless API and kubectl plugin that stores and retrieve Kubernetes cluster credentials. Hyperkube leverages AWS Secrets Manager for storing credential information."""
 URL = 'https://github.com/silvermullet/hyper-kube-config'
 EMAIL = 'zane@ugh.cloud'
 AUTHOR = 'Zane Williamson'
