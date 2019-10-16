@@ -13,7 +13,7 @@ install:
   - pip install -r requirements.txt
   - pip install -r tests/requirements.txt
 
-script: flake8 --exclude setup.py *.py tests cli/kubectl-hyperkube && python -m unittest discover -s tests/ -p "*.py"
+script: flake8 *.py tests cli/kubectl-hyperkube && python -m unittest discover -s tests/ -p "*.py"
 
 deploy:
   provider: pypi
