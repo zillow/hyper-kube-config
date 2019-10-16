@@ -10,8 +10,9 @@ SECRETS_CLIENT = boto3.client('secretsmanager')
 
 
 def add_cluster(event, context):
-    """Add cluster and initial credentials. Handler function for lambda (entry point)"""
-    
+    """Add cluster and initial credentials.
+    Handler function for lambda (entry point)"""
+
     validate_config_input(event['body'])
     cluster_config = json.loads(event['body'])
     cluster_users = cluster_config['users']
@@ -20,10 +21,8 @@ def add_cluster(event, context):
         try:
             cluster_name = cluster['name']
             cluster_server = cluster['cluster']['server']
-            if 'certificate-authority-data' in cluster['cluster']:
-                cluster_authority = cluster['cluster']['certificate-authority-data']
-            else:
-                cluster_authority = "NA"
+            cluster_authority = cluster['cluster'].get(
+                'certificate-authority-data', 'NA')
         except KeyError as err:
             print(f'Invalid cluster config: {err}')
             raise err
@@ -33,9 +32,10 @@ def add_cluster(event, context):
             names = [user['name'] for user in get_users(cluster_config)]
 
             for name in get_users(cluster_config):
-                for user_data,secret in name['user'].items():
+                for user_data, secret in name['user'].items():
                     save_creds(cluster_name, name['name'], user_data, secret)
-                    update_cluster_users_secret_name(cluster_name, name['name'], user_data, cluster_users)
+                    update_cluster_users_secret_name(
+                        cluster_name, name['name'], user_data, cluster_users)
 
             CLUSTER_TABLE.put_item(
                 Item={
@@ -60,11 +60,12 @@ def add_cluster(event, context):
             )
         }
 
+
 def get_users(cluster_config):
     """Get users from config object"""
 
-    users = [user for user in cluster_config['users']]
-    return users
+    return list(cluster_config['users'])
+
 
 def save_creds(cluster_name, name, user_data, secret):
     """Save creds for users in config object"""
@@ -89,14 +90,17 @@ def save_creds(cluster_name, name, user_data, secret):
         ]
     )
 
+
 def get_clusters(cluster_config):
     """Get list of clusters"""
-    clusters = [cluster for cluster in cluster_config['clusters']]
-    return clusters
+    return list(cluster_config['clusters'])
 
-def update_cluster_users_secret_name(cluster_name, name, user_data, cluster_users):
+
+def update_cluster_users_secret_name(cluster_name, name,
+                                     user_data, cluster_users):
     """Update secret data with AWS Secret Manager reference name"""
     print(f'HERE is cluster_users: {cluster_users}')
     for user in cluster_users:
         if user['name'] == name and user_data in user['user']:
-            user['user'][user_data] = f'hyper-kube-config-{name}-{user_data}-{cluster_name}'
+            val = f'hyper-kube-config-{name}-{user_data}-{cluster_name}'
+            user['user'][user_data] = val

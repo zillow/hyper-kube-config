@@ -1,13 +1,15 @@
 import json
-import os
+
 import boto3
+
 from botocore.exceptions import ClientError
 
 SECRETS_CLIENT = boto3.client('secretsmanager')
 
+
 def add_pem(event, context):
     """Add pem file and associate to a k8s cluster via a tag"""
-    
+
     pem = event['body']
     cluster_name = event['queryStringParameters']['cluster_name']
 
@@ -38,7 +40,8 @@ def add_pem(event, context):
         return {
             "statusCode": 503,
             "body": json.dumps(
-                {"message": f'Failed to add pem and associate to {cluster_name}: {e}'}
+                {"message":
+                 f'Failed to add pem and associate to {cluster_name}: {e}'}
             )
         }
 
@@ -63,14 +66,16 @@ def get_pem(event, context):
         return {
             "statusCode": 503,
             "body": json.dumps(
-                {"message": f'Failed to get pem associated to {cluster_name}: {e}'}
+                {"message":
+                 f'Failed to get pem associated to {cluster_name}: {e}'}
             )
         }
+
 
 def remove_pem(event, context):
     """Remove pem secret for a specific cluster"""
 
-    cluster_name = event['queryStringParameters']['cluster_name'] 
+    cluster_name = event['queryStringParameters']['cluster_name']
 
     try:
         print(f'Deleting hyper-kube-config-pem-{cluster_name}')
@@ -81,13 +86,15 @@ def remove_pem(event, context):
 
         return {
             "statusCode": 200,
-            "body": {"message": f'Deleted hyper-kube-config-pem-{cluster_name}'},
+            "body": {"message":
+                     f'Deleted hyper-kube-config-pem-{cluster_name}'},
         }
 
     except ClientError as e:
         return {
             "statusCode": 503,
             "body": json.dumps(
-                {"message": f'Failed to get pem associated to {cluster_name}: {e}'}
+                {"message": (f'Failed to get pem associated '
+                             f'to {cluster_name}: {e}')}
             )
         }
