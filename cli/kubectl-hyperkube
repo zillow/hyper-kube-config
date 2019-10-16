@@ -1,23 +1,26 @@
 #!/usr/bin/env python3
 
-import requests
 import click
-import sys
-import subprocess
-import yaml
-from pprint import pprint
 import json
 from pathlib import Path
+from pprint import pprint
+import requests
+import sys
+import yaml
+
 
 @click.group()
-@click.option('--config', '-c', required=False, default=str(Path.home()) + "/hyperkube-config.yaml")
+@click.option('--config', '-c', required=False,
+              default=str(Path.home()) + "/hyperkube-config.yaml")
 @click.pass_context
 def cli(ctx, config):
     ctx.ensure_object(dict)
     ctx.obj['hyperkube_config'] = _load_config(config)
     ctx.obj['url'] = ctx.obj['hyperkube_config']['url']
     ctx.obj['stage'] = ctx.obj['hyperkube_config']['stage']
-    ctx.obj['headers'] = {'X-Api-Key': ctx.obj['hyperkube_config']['x_api_key']}
+    headers = {'X-Api-Key': ctx.obj['hyperkube_config']['x_api_key']}
+    ctx.obj['headers'] = headers
+
 
 @cli.command()
 @click.pass_context
@@ -35,12 +38,13 @@ def list(ctx):
     except requests.exceptions.RequestException as err:
         print(f'Request error: {err}')
 
+
 @cli.command()
 @click.option('--k8s-config', '-k', default="~/.kube/config")
 @click.pass_context
 def add(ctx, k8s_config):
     """Add cluster to hyper-kube-config"""
-    
+
     k8s_cfg = json.dumps(_load_config(k8s_config))
     print(k8s_cfg)
 
@@ -63,9 +67,9 @@ def add(ctx, k8s_config):
 @click.pass_context
 def add_ca_key(ctx, cluster_name, ca_key):
     """Add cluster CA key to hyper-kube-config"""
-    
+
     key = _load_pem(ca_key)
-    post = { "cluster_name": cluster_name, "ca_key": key }
+    post = {"cluster_name": cluster_name, "ca_key": key}
 
     try:
         r = requests.post(
@@ -83,10 +87,11 @@ def add_ca_key(ctx, cluster_name, ca_key):
 @click.pass_context
 def remove_ca_key(ctx, cluster_name):
     """Remove specified cluster CA key from hyper-kube-config"""
-    
+
     try:
         r = requests.get(
-            f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/remove-ca-key?{cluster_name}',
+            (f'{ctx.obj["url"]}/{ctx.obj["stage"]}'
+             f'/clusters/remove-ca-key?{cluster_name}'),
             headers=ctx.obj['headers']
         )
         pprint(r.json())
@@ -106,7 +111,7 @@ def remove(ctx, cluster_to_remove):
         r = requests.post(
             f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/remove',
             headers=ctx.obj['headers'],
-            data=json.dumps({ "cluster_name": cluster_to_remove})
+            data=json.dumps({"cluster_name": cluster_to_remove})
         )
         pprint(r.json())
         if r.status_code == 404:
@@ -119,18 +124,20 @@ def remove(ctx, cluster_to_remove):
 @click.option('--cluster', '-g', multiple=True)
 @click.pass_context
 def get(ctx, cluster):
-    """Retrieve and concatenate one or more cluster configs into one config, set context to first cluster"""
+    """Retrieve and concatenate one or more cluster configs into one config,
+    set context to first cluster"""
 
     param_string = ""
     for c in cluster:
         param_string = param_string + c + "&"
-    
+
     # remove trailing '&'
-    param_string = param_string[:-1]    
+    param_string = param_string[:-1]
 
     try:
         r = requests.get(
-            f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/get-k8-config?{param_string}',
+            (f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/get-k8-config?'
+             f'{param_string}'),
             headers=ctx.obj['headers']
         )
         pprint(r.json())
@@ -162,10 +169,11 @@ def get_all(ctx):
 @click.pass_context
 def get_pem(ctx, cluster):
     """Get the pem file for a specific cluster"""
-    
+
     try:
         r = requests.get(
-            f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/get-pem?cluster_name={cluster}',
+            (f'{ctx.obj["url"]}/{ctx.obj["stage"]}'
+             f'/clusters/get-pem?cluster_name={cluster}'),
             headers=ctx.obj['headers']
         )
         pprint(r.text)
@@ -174,6 +182,7 @@ def get_pem(ctx, cluster):
     except requests.exceptions.RequestException as err:
         print(f'Request error: {err}')
 
+
 @cli.command()
 @click.option('--cluster', '-g', required=True)
 @click.option('--pem', '-p', required=True)
@@ -181,11 +190,12 @@ def get_pem(ctx, cluster):
 def add_pem(ctx, cluster, pem):
     """Add a pem file for a specific cluster"""
 
-    pem_data = _load_pem(pem) 
+    pem_data = _load_pem(pem)
 
     try:
         r = requests.post(
-            f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/add-pem?cluster_name={cluster}',
+            (f'{ctx.obj["url"]}/{ctx.obj["stage"]}'
+             f'/clusters/add-pem?cluster_name={cluster}'),
             headers=ctx.obj['headers'],
             data=pem_data
         )
@@ -194,6 +204,7 @@ def add_pem(ctx, cluster, pem):
             sys.exit(1)
     except requests.exceptions.RequestException as err:
         print(f'Request error: {err}')
+
 
 @cli.command()
 @click.option('--environment', '-g')
@@ -207,7 +218,9 @@ def set_cluster_status(ctx, environment, status, cluster):
         try:
             print(f'Setting cluster environment to {environment}')
             r = requests.get(
-                f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/set-cluster-environment?cluster_name={cluster}&environment={environment}',
+                (f'{ctx.obj["url"]}/{ctx.obj["stage"]}'
+                 f'/clusters/set-cluster-environment?cluster_name={cluster}'
+                 f'&environment={environment}'),
                 headers=ctx.obj['headers']
             )
             if r.status_code == 404:
@@ -218,7 +231,9 @@ def set_cluster_status(ctx, environment, status, cluster):
         try:
             print(f'Setting cluster status {status}')
             r = requests.get(
-                f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/set-cluster-status?cluster_name={cluster}&cluster_status={status}',
+                (f'{ctx.obj["url"]}/{ctx.obj["stage"]}'
+                 f'/clusters/set-cluster-status?cluster_name={cluster}'
+                 f'&cluster_status={status}'),
                 headers=ctx.obj['headers']
             )
             if r.status_code == 404:
@@ -227,7 +242,8 @@ def set_cluster_status(ctx, environment, status, cluster):
             print(f'Request error: {err}')
 
     if not status and not environment:
-        print(f'Please provide either --environment or --status flag for updating cluster')
+        print(('Please provide either --environment or --status flag'
+               'for updating cluster'))
 
 
 @cli.command()
@@ -239,7 +255,9 @@ def get_cluster_status(ctx, environment, status):
 
     try:
         r = requests.get(
-            f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/cluster-status?cluster_status={status}&environment={environment}',
+            (f'{ctx.obj["url"]}/{ctx.obj["stage"]}'
+             f'/clusters/cluster-status?cluster_status={status}'
+             f'&environment={environment}'),
             headers=ctx.obj['headers']
         )
         pprint(r.json())
@@ -265,7 +283,7 @@ def _load_pem(pem):
     try:
         with open(pem, 'r') as pemfile:
             return pemfile.read()
-    except FileNotFoundError as err:
+    except FileNotFoundError:
         print(f'Provided pem not found: {pem}')
         sys.exit(1)
 

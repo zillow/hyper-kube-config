@@ -1,9 +1,5 @@
-
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
-# Note: To use the 'upload' functionality of this file, you must:
-#   $ pip install twine
 
 import io
 import os
@@ -14,7 +10,9 @@ from setuptools import find_packages, setup, Command
 
 # Package meta-data.
 NAME = 'hyper-kube-config'
-DESCRIPTION = 'H Y P E R K U B E - A secure Serverless API and kubectl plugin that stores and retrieve Kubernetes cluster credentials. Hyperkube leverages AWS Secrets Manager for storing credential information.'
+DESCRIPTION = """H Y P E R K U B E - A secure Serverless API and kubectl plugin
+that stores and retrieve Kubernetes cluster credentials.
+Hyperkube leverages AWS Secrets Manager for storing credential information."""
 URL = 'https://github.com/silvermullet/hyper-kube-config'
 EMAIL = 'zane@ugh.cloud'
 AUTHOR = 'Zane Williamson'
@@ -31,7 +29,7 @@ REQUIRED = [
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
 # Except, perhaps the License and Trove Classifiers!
-# If you do change the License, remember to change the Trove Classifier for that!
+# If you do change the License, remember to change the Trove Classifier too!
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -74,7 +72,8 @@ class UploadCommand(Command):
             pass
 
         self.status('Building Source and Wheel (universal) distribution…')
-        os.system('{0} setup.py sdist bdist_wheel --universal'.format(sys.executable))
+        os.system('{0} setup.py sdist bdist_wheel --universal'.format(
+            sys.executable))
 
         self.status('Uploading the package to PyPi via Twine…')
         os.system('twine upload dist/*')

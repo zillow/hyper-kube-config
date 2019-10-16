@@ -32,7 +32,8 @@ def remove_cluster(event, context):
         return {
             "statusCode": 200,
             "body": json.dumps(
-                {"message": f'Cluster and associated secrets removed for: {cluster_name}'}
+                {"message": (f'Cluster and associated secrets '
+                             f'removed for: {cluster_name}')}
             ),
         }
     return {
@@ -42,6 +43,7 @@ def remove_cluster(event, context):
         )
     }
 
+
 def delete_secrets(cluster_name):
     """Delete AWS Secrets Manager secrets"""
 
@@ -49,12 +51,17 @@ def delete_secrets(cluster_name):
     secrets = []
     while resp:
         secrets += resp['SecretList']
-        resp = SECRETS_CLIENT.list_secrets(NextToken=resp['NextToken']) if 'NextToken' in resp else None
+        nextToken = resp.get('NextToken')
+        if nextToken is not None:
+            resp = SECRETS_CLIENT.list_secrets(NextToken=nextToken)
+        else:
+            resp = None
 
     for secret in secrets:
         if 'Tags' in secret:
             for tag in secret['Tags']:
-                if tag['Key'] == 'cluster_name' and tag['Value'] == cluster_name:
+                if (tag['Key'] == 'cluster_name'
+                   and tag['Value'] == cluster_name):
                     try:
                         print(f"Deleting secret: {secret['Name']}")
                         SECRETS_CLIENT.delete_secret(
@@ -62,4 +69,6 @@ def delete_secrets(cluster_name):
                             ForceDeleteWithoutRecovery=True
                         )
                     except Exception as err:
-                        print(f"Secret {secret} not found, nothing to delete: {err}")
+                        # XXX - handle correct exceptions here!
+                        print((f"Secret {secret} not found, "
+                               f"nothing to delete: {err}"))

@@ -9,7 +9,7 @@ CLUSTER_TABLE = DYNAMODB.Table(CLUSTER_TABLE_NAME)
 
 def list_clusters(event, context):
     """List clusters"""
-    
+
     clusters = []
     cluster_items = CLUSTER_TABLE.scan()
 

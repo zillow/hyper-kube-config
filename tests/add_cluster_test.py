@@ -1,11 +1,13 @@
 import unittest
 import os
-import sys
+
 import boto3
-import json
-sys.path.insert(0, './')
-import add_cluster
+
 from moto import mock_dynamodb2
+
+# XXX - should add a test!
+# import add_cluster
+
 
 class TestAddCluster(unittest.TestCase):
     """Testing for add_cluster.py"""
@@ -36,8 +38,8 @@ class TestAddCluster(unittest.TestCase):
                 'WriteCapacityUnits': 5
             },
         )
-        self.hyper_kube_config_table = self.dynamodb.Table(os.environ["DYNAMODB_TABLE_K8_CLUSTERS"])
-
+        self.hyper_kube_config_table = self.dynamodb.Table(
+            os.environ["DYNAMODB_TABLE_K8_CLUSTERS"])
 
 
 if __name__ == '__main__':
