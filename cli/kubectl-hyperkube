@@ -25,14 +25,14 @@ def cli(ctx, config):
 @cli.command()
 @click.pass_context
 def list(ctx):
-    """List clusters in hyper-kube-config"""
+    """List all clusters in hyper-kube-config"""
 
     try:
         r = requests.get(
             f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/list',
             headers=ctx.obj['headers']
         )
-        pprint(r.json())
+        pprint(sorted(r.json()))
         if r.status_code != 200:
             sys.exit(1)
     except requests.exceptions.RequestException as err:
