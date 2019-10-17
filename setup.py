@@ -15,7 +15,7 @@ URL = 'https://github.com/silvermullet/hyper-kube-config'
 EMAIL = 'zane@ugh.cloud'
 AUTHOR = 'Zane Williamson'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = "0.1.5"
+VERSION = "0.1.6"
 
 # What packages are required for this module to be executed?
 REQUIRED = [

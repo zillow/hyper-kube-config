@@ -4,10 +4,15 @@ This file is used to list changes made in each version of hyper-kube-config.
 
 ## unreleased
 
+## 0.1.6 (2019-10-17)
+- [Nolan  Emirot]
+  - Sort cluster list output in kubectl hyperkube
+
 ## 0.1.5 (2019-09-16)
-- [Zane Williamson]
+- [Zane Williamson, Christopher Zorn]
   - Allow cluster-authority-data to be an optional input
   - updating dependencies 
+  - Flake changes, also run flake in travis
 
 ## 0.1.4 (2019-06-03)
 - [Swarup Donepudi]
