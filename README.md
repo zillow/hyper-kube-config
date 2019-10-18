@@ -40,7 +40,7 @@ kubectl hyperkube remove --cluster-to-remove 'k8s-cluster-example.cloud'
 
 ```bash
 # for single cluster
-kubectl hyperkube get --cluster cloud-infra.cloud
+kubectl hyperkube get --cluster cloud-infra.cloud -m
 ```
 
 ## Get user creds multiple clusters and merge them with existing `~/.kube/config`
@@ -49,13 +49,13 @@ kubectl hyperkube get --cluster cloud-infra.cloud
 kubectl hyperkube get \
   --cluster cloud-infra.cloud \
   --cluster bar-cluster.cloud \
-  --cluster baz-cluster.com
+  --cluster baz-cluster.com -m
 ```
 
 ## Get creds for all clusters and merge it with existing `~/.kube/config`
 
 ```bash
-kubectl hyperkube get-all
+kubectl hyperkube get-all -m
 ```
 
 ## List clusters

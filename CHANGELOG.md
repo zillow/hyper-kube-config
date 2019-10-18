@@ -6,9 +6,7 @@ This file is used to list changes made in each version of hyper-kube-config.
 
 ## 0.1.7 (2019-10-18)
 - [Swarup Donepudi]
-  - Make the default behavior of `get` and `get-all` to merge with existing `~/.kube/config` or whatever the user passes using the option `-k`
-
-  - Optionallly user can just see the kubeconfigs by setting `--dry-run` or `-d` flag for `get` and `get-all`
+  - Provide the option to user for `get` and `get-all` to merge with existing `~/.kube/config` or whatever the user passes using the option `-k`
 
 ## 0.1.6 (2019-10-17)
 - [Nolan  Emirot]
