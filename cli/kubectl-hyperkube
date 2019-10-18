@@ -144,9 +144,8 @@ def get(ctx, cluster, k8s_config, dry_run):
              f'{param_string}'),
             headers=ctx.obj['headers']
         )
-        if dry_run:
-            print(r.json())
-        else:
+        print(r.json())
+        if not dry_run:
             write_kubeconfig(r.json(), k8s_config)
         if r.status_code == 404:
             sys.exit(1)
@@ -167,9 +166,8 @@ def get_all(ctx, k8s_config, dry_run):
             f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/get-all-k8-configs',
             headers=ctx.obj['headers']
         )
-        if dry_run:
-            print(r.json())
-        else:
+        print(r.json())
+        if not dry_run:
             write_kubeconfig(r.json(), k8s_config)
         if r.status_code == 404:
             sys.exit(1)
