@@ -4,6 +4,11 @@ This file is used to list changes made in each version of hyper-kube-config.
 
 ## unreleased
 
+## 0.1.7 (2019-10-18)
+- [Swarup Donepudi]
+  - make writing by merging to ~/.kube/config as the default behavior
+  - make display only as optional
+
 ## 0.1.6 (2019-10-17)
 - [Nolan  Emirot]
   - Sort cluster list output in kubectl hyperkube

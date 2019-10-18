@@ -7,7 +7,8 @@ from pprint import pprint
 import requests
 import sys
 import yaml
-
+import os
+from merge_kubeconfigs import merge
 
 @click.group()
 @click.option('--config', '-c', required=False,
@@ -40,7 +41,7 @@ def list(ctx):
 
 
 @cli.command()
-@click.option('--k8s-config', '-k', default="~/.kube/config")
+@click.option('--k8s-config', '-k', default=f"{Path.home()}/.kube/config")
 @click.pass_context
 def add(ctx, k8s_config):
     """Add cluster to hyper-kube-config"""
@@ -122,8 +123,10 @@ def remove(ctx, cluster_to_remove):
 
 @cli.command()
 @click.option('--cluster', '-g', multiple=True)
+@click.option('--k8s-config', '-k', default=f"{Path.home()}/.kube/config", required= False)
+@click.option('--show-only', '-s', is_flag=True, default= False, required= False)
 @click.pass_context
-def get(ctx, cluster):
+def get(ctx, cluster, k8s_config, show_only):
     """Retrieve and concatenate one or more cluster configs into one config,
     set context to first cluster"""
 
@@ -140,7 +143,10 @@ def get(ctx, cluster):
              f'{param_string}'),
             headers=ctx.obj['headers']
         )
-        pprint(r.json())
+        if show_only:
+          print(r.json())
+        else:
+          write_kubeconfig(r.json(), k8s_config)
         if r.status_code == 404:
             sys.exit(1)
     except requests.exceptions.RequestException as err:
@@ -148,8 +154,10 @@ def get(ctx, cluster):
 
 
 @cli.command()
+@click.option('--k8s-config', '-k', default=f"{Path.home()}/.kube/config", required= False)
+@click.option('--show-only', '-s', is_flag=True, default= False, required= False)
 @click.pass_context
-def get_all(ctx):
+def get_all(ctx, k8s_config, show_only):
     """Retrieve and concatenate all cluster configs into one config"""
 
     try:
@@ -157,7 +165,10 @@ def get_all(ctx):
             f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/get-all-k8-configs',
             headers=ctx.obj['headers']
         )
-        pprint(r.json())
+        if show_only:
+          print(r.json())
+        else:
+          write_kubeconfig(r.json(), k8s_config)
         if r.status_code == 404:
             sys.exit(1)
     except requests.exceptions.RequestException as err:
@@ -286,6 +297,20 @@ def _load_pem(pem):
     except FileNotFoundError:
         print(f'Provided pem not found: {pem}')
         sys.exit(1)
+
+
+def write_kubeconfig(fetched_kubeconfig, destination_file):
+  temp_kubeconfig_file = "temp-kubeconfig.yaml"
+  temp_file = open(temp_kubeconfig_file, 'w+')
+  yaml.dump(fetched_kubeconfig, temp_file, allow_unicode=True)
+  
+  if os.path.exists(destination_file):
+    source_kubeconfigs = [temp_kubeconfig_file, destination_file]
+  else:
+    source_kubeconfigs = [temp_kubeconfig_file]
+
+  merge(source_kubeconfigs, destination_file)
+  os.remove(temp_kubeconfig_file)
 
 
 if __name__ == '__main__':

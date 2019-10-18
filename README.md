@@ -19,7 +19,7 @@ It requires a configuration file. See [hyperkube-config.yaml.example](hyperkube-
 pip3 install hyper-kube-config 
 ```
 
-## Setup `~/.hyperkube-config.yaml` file
+## Setup `~/hyperkube-config.yaml` file
 
 The default locations for the config file is `~/.hyperkube-config.yaml`. You can also place the config file at a different location and pass the location as a command line option `-c <hyper-kube-config-location>` or `--config <hyper-kube-config-location>`
 
@@ -36,26 +36,26 @@ kubectl hyperkube add --k8s-config ~/.kube/config
 kubectl hyperkube remove --cluster-to-remove 'k8s-cluster-example.cloud' 
 ```
 
-## Get user creds
+## Get user creds and merge it with existing `~/.kube/config`
 
 ```bash
 # for single cluster
-kubectl hyperkube get --cluster cloud-infra.cloud > ~/.kube/config
+kubectl hyperkube get --cluster cloud-infra.cloud
 ```
 
-## Get user creds multiple clusters into one Kube config
+## Get user creds multiple clusters and merge them with existing `~/.kube/config`
 
 ```bash
 kubectl hyperkube get \
   --cluster cloud-infra.cloud \
   --cluster bar-cluster.cloud \
-  --cluster baz-cluster.com  > ~/.kube/config
+  --cluster baz-cluster.com
 ```
 
-## Get creds for all clusters into one Kube config
+## Get creds for all clusters and merge it with existing `~/.kube/config`
 
 ```bash
-kubectl hyperkube get-all > ~/.kube/config
+kubectl hyperkube get-all
 ```
 
 ## List clusters
