@@ -21,7 +21,7 @@ pip3 install hyper-kube-config
 
 ## Setup `~/hyperkube-config.yaml` file
 
-The default locations for the config file is `~/.hyperkube-config.yaml`. You can also place the config file at a different location and pass the location as a command line option `-c <hyper-kube-config-location>` or `--config <hyper-kube-config-location>`
+The default locations for the config file is `~/hyperkube-config.yaml`. You can also place the config file at a different location and pass the location as a command line option `-c <hyper-kube-config-location>` or `--config <hyper-kube-config-location>`
 
 
 ## Post cluster and creds to hyperkube store

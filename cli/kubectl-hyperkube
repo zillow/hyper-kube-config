@@ -8,7 +8,6 @@ import requests
 import sys
 import yaml
 import os
-from merge_kubeconfigs import merge
 
 @click.group()
 @click.option('--config', '-c', required=False,
@@ -124,9 +123,9 @@ def remove(ctx, cluster_to_remove):
 @cli.command()
 @click.option('--cluster', '-g', multiple=True)
 @click.option('--k8s-config', '-k', default=f"{Path.home()}/.kube/config", required= False)
-@click.option('--show-only', '-s', is_flag=True, default= False, required= False)
+@click.option('--dry-run', '-d', is_flag=True, default= False, required= False, help='If set, cluster config is only displayed on the console')
 @click.pass_context
-def get(ctx, cluster, k8s_config, show_only):
+def get(ctx, cluster, k8s_config, dry_run):
     """Retrieve and concatenate one or more cluster configs into one config,
     set context to first cluster"""
 
@@ -143,7 +142,7 @@ def get(ctx, cluster, k8s_config, show_only):
              f'{param_string}'),
             headers=ctx.obj['headers']
         )
-        if show_only:
+        if dry_run:
           print(r.json())
         else:
           write_kubeconfig(r.json(), k8s_config)
@@ -155,9 +154,9 @@ def get(ctx, cluster, k8s_config, show_only):
 
 @cli.command()
 @click.option('--k8s-config', '-k', default=f"{Path.home()}/.kube/config", required= False)
-@click.option('--show-only', '-s', is_flag=True, default= False, required= False)
+@click.option('--dry-run', '-d', is_flag=True, default= False, required= False, help='If set, cluster config is only displayed on the console')
 @click.pass_context
-def get_all(ctx, k8s_config, show_only):
+def get_all(ctx, k8s_config, dry_run):
     """Retrieve and concatenate all cluster configs into one config"""
 
     try:
@@ -165,7 +164,7 @@ def get_all(ctx, k8s_config, show_only):
             f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/get-all-k8-configs',
             headers=ctx.obj['headers']
         )
-        if show_only:
+        if dry_run:
           print(r.json())
         else:
           write_kubeconfig(r.json(), k8s_config)
@@ -299,6 +298,31 @@ def _load_pem(pem):
         sys.exit(1)
 
 
+def _parse_kube_config(filename):
+  with open(filename) as data_file:
+      config = yaml.load(data_file, Loader=yaml.FullLoader)
+  return config
+
+
+def _merge(source_files, target_file):
+  parsed = [_parse_kube_config(file) for file in source_files]
+
+  # Now do an effective flatmap to get it all into a single structure
+  target_config = {
+      "apiVersion": "v1",
+      "kind": "Config",
+      "current-context": "",
+      "clusters": [],
+      "contexts": [],
+      "users": [],
+  }
+
+  for config in parsed:
+    for key in ['clusters', 'contexts', 'users']:
+        target_config[key].extend(config.get(key, []))
+    open(target_file, 'w').write(yaml.dump(target_config))
+
+
 def write_kubeconfig(fetched_kubeconfig, destination_file):
   temp_kubeconfig_file = "temp-kubeconfig.yaml"
   temp_file = open(temp_kubeconfig_file, 'w+')
@@ -309,7 +333,7 @@ def write_kubeconfig(fetched_kubeconfig, destination_file):
   else:
     source_kubeconfigs = [temp_kubeconfig_file]
 
-  merge(source_kubeconfigs, destination_file)
+  _merge(source_kubeconfigs, destination_file)
   os.remove(temp_kubeconfig_file)
 
 
