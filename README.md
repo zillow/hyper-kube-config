@@ -134,3 +134,9 @@ Serverless will launch an [AWS API Gateway](https://docs.aws.amazon.com/apigatew
   ```
   flake8 *.py tests cli/kubectl-hyperkube
   ```
+
+3. Run unit tests
+
+  ```
+  python -m unittest discover -s tests/ -p "*.py"
+  ```
