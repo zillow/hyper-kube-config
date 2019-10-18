@@ -120,3 +120,17 @@ sls deploy \
 This will launch your hyperkube API. Capture the API URL, api key and stage for your hyperkube.yaml configuration. The `kubectl hyperkube` commands will leverage the config to interact with your stored k8s configs.
 
 Serverless will launch an [AWS API Gateway](https://docs.aws.amazon.com/apigateway/index.html) to handle API requests forwardered to [AWS Lambda functions](https://docs.aws.amazon.com/lambda/index.html#lang/en_us). A Dynamodb table is configured to store non-senstative cluster config details, while sensative information in uploaded configs (passwords and certs) is stored in [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/index.html).
+
+### Testing for lint errors on your local machine
+
+1. Install Test Dependencies
+
+  ```
+  pip install -U -r tests/requirements.txt
+  ```
+
+2. Run flake8 to check for lint errors
+
+  ```
+  flake8 *.py tests cli/kubectl-hyperkube
+  ```
