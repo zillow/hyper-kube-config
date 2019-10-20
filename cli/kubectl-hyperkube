@@ -305,11 +305,27 @@ def _parse_kube_config(filename):
     return config
 
 
-def _merge(source_files, target_file):
-    parsed = [_parse_kube_config(file) for file in source_files]
+def _is_duplicate(destination_config_object, new_config_item_name):
+  for destination_config_obejct_item in destination_config_object:
+    if destination_config_obejct_item.get("name") == new_config_item_name:
+      return True
+  return False
+
+
+def _remove_old_objects(key,destination_config_object, new_config_object):
+    destination_config_object_new = []
+    for destination_config_object_item in destination_config_object:  
+      if not _is_duplicate(new_config_object, destination_config_object_item.get("name")):
+        destination_config_object_new.append(destination_config_object_item)
+    return destination_config_object_new
+
+
+def _merge(source_files, destination_file):
+    parsed = [_parse_kube_config(file) for file
+              in source_files if os.path.exists(file)]
 
     # Now do an effective flatmap to get it all into a single structure
-    target_config = {
+    destination_config = {
         "apiVersion": "v1",
         "kind": "Config",
         "current-context": "",
@@ -318,20 +334,20 @@ def _merge(source_files, target_file):
         "users": [],
     }
 
-    for config in parsed:
+    for new_config in parsed:
         for key in ['clusters', 'contexts', 'users']:
-            target_config[key].extend(config.get(key, []))
-        open(target_file, 'w').write(yaml.dump(target_config))
+            destination_config[key] = _remove_old_objects(key, destination_config[key], new_config.get(key, []))
+            destination_config[key].extend(new_config.get(key, []))
+        with open(destination_file, 'w') as destination_file_obj:
+            yaml.dump(destination_config, destination_file_obj)
 
 
 def write_kubeconfig(fetched_kubeconfig, destination_file):
     temp_kubeconfig_file = "temp-kubeconfig.yaml"
-    temp_file = open(temp_kubeconfig_file, 'w+')
-    yaml.dump(fetched_kubeconfig, temp_file, allow_unicode=True)
-    if os.path.exists(destination_file):
-        source_kubeconfigs = [temp_kubeconfig_file, destination_file]
-    else:
-        source_kubeconfigs = [temp_kubeconfig_file]
+    with open(temp_kubeconfig_file, 'w') as temp_kubeconfig_file_obj:
+        yaml.dump(fetched_kubeconfig, temp_kubeconfig_file_obj)
+
+    source_kubeconfigs = [temp_kubeconfig_file, destination_file]
     _merge(source_kubeconfigs, destination_file)
     os.remove(temp_kubeconfig_file)
 
