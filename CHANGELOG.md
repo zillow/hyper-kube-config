@@ -4,6 +4,10 @@ This file is used to list changes made in each version of hyper-kube-config.
 
 ## unreleased
 
+## 0.1.7 (2019-10-18)
+- [Swarup Donepudi]
+  - Provide the option to user for `get` and `get-all` to merge with existing `~/.kube/config` or whatever the user passes using the option `-k`
+
 ## 0.1.6 (2019-10-17)
 - [Nolan  Emirot]
   - Sort cluster list output in kubectl hyperkube
