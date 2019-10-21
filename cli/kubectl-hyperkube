@@ -299,12 +299,6 @@ def _load_pem(pem):
         sys.exit(1)
 
 
-def _parse_kube_config(filename):
-    with open(filename) as data_file:
-        config = yaml.load(data_file, Loader=yaml.FullLoader)
-    return config
-
-
 def _is_duplicate(destination_config_object, new_config_item_name):
   for destination_config_obejct_item in destination_config_object:
     if destination_config_obejct_item.get("name") == new_config_item_name:
@@ -321,12 +315,16 @@ def _remove_old_objects(key,destination_config_object, new_config_object):
 
 
 def _merge(source_files, destination_file):
-    parsed = [_parse_kube_config(file) for file
+    parsed = [_load_config(file) for file
               in source_files if os.path.exists(file)]
 
     # Now do an effective flatmap to get it all into a single structure
-    destination_config = _load_config(destination_file)
-    current_context = destination_config.get('current-context',"")
+    if os.path.exists(destination_file):
+      destination_config = _load_config(destination_file)
+      current_context = destination_config.get('current-context',"")
+    else:
+      current_context=""
+
     destination_config = {
         "apiVersion": "v1",
         "kind": "Config",
