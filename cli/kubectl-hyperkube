@@ -325,10 +325,12 @@ def _merge(source_files, destination_file):
               in source_files if os.path.exists(file)]
 
     # Now do an effective flatmap to get it all into a single structure
+    destination_config = _load_config(destination_file)
+    current_context = destination_config.get('current-context',"")
     destination_config = {
         "apiVersion": "v1",
         "kind": "Config",
-        "current-context": "",
+        "current-context": current_context,
         "clusters": [],
         "contexts": [],
         "users": [],
@@ -340,6 +342,7 @@ def _merge(source_files, destination_file):
             destination_config[key].extend(new_config.get(key, []))
         with open(destination_file, 'w') as destination_file_obj:
             yaml.dump(destination_config, destination_file_obj)
+
 
 
 def write_kubeconfig(fetched_kubeconfig, destination_file):
