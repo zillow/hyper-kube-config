@@ -11,8 +11,8 @@ env:
   - AWS_DEFAULT_REGION=us-east-1 DYNAMODB_TABLE_K8_CLUSTERS=hyper-kube-config-test
 
 install:
-  - pip install -r requirements.txt
-  - pip install -r tests/requirements.txt
+  - pip install pipenv
+  - pipenv install --dev
 
 script: flake8 *.py tests cli/kubectl-hyperkube && python -m unittest discover -s tests/ -p "*.py"
 
