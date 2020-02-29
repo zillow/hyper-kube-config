@@ -286,7 +286,7 @@ def get_cluster_for_environment(ctx, environment):
     req_path = (f'{ctx.obj["url"]}/{ctx.obj["stage"]}'
                 f'/clusters/clusters-per-environment')
     if environment is not None:
-        req_path += f'environment={environment}'
+        req_path += f'?environment={environment}'
     try:
         r = requests.get(req_path, headers=ctx.obj['headers'])
         pprint(r.json())
