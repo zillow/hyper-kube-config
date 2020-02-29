@@ -9,6 +9,7 @@ cryptography = "==2.4.2"
 click = "==7.0"
 pyyaml = "==5.1"
 requests = "==v2.22.0"
+moto = "==1.3.14"
 
 [dev-packages]
 pylint = "*"

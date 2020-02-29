@@ -1,30 +1,27 @@
 import json
-import os
 
-import boto3
 from boto3.dynamodb.conditions import Key
 
 
-DYNAMODB = boto3.resource('dynamodb')
-CLUSTER_TABLE_NAME = os.environ['DYNAMODB_TABLE_K8_CLUSTERS']
-CLUSTER_TABLE = DYNAMODB.Table(CLUSTER_TABLE_NAME)
+import storage
 
 
 def set_cluster_status(event, context):
     """Set the status of a cluster, ie active, inactive,
     maintainance_mode, etc"""
 
-    try:
-        cluster_status = event['queryStringParameters']['cluster_status']
-    except Exception:
+    CLUSTER_TABLE = storage.get_cluster_table()
+    query_string_params = event.get('queryStringParameters', {})
+    cluster_status = query_string_params.get('cluster_status')
+    if cluster_status is None:
         return {
             "statusCode": 500,
             "body": {"message":
                      f'Must provide a status variable in uri query string'}
         }
-    try:
-        cluster_name = event['queryStringParameters']['cluster_name']
-    except Exception:
+
+    cluster_name = query_string_params.get('cluster_name')
+    if cluster_name is None:
         return {
             "statusCode": 500,
             "body": {"message": (f'Must provide a cluster_name '
@@ -59,23 +56,23 @@ def set_cluster_status(event, context):
 def set_cluster_environment(event, context):
     """Set the environment of a cluster, ie dev, stage, prod"""
 
-    try:
-        environment = event['queryStringParameters']['environment']
-    except Exception:
+    CLUSTER_TABLE = storage.get_cluster_table()
+    query_string_params = event.get('queryStringParameters', {})
+    environment = query_string_params.get('environment')
+    if environment is None:
         return {
             "statusCode": 500,
-            "body": {"message": (f'Must provide an environment variable '
-                                 f'in uri query string')}
-        }
-    try:
-        cluster_name = event['queryStringParameters']['cluster_name']
-    except Exception:
-        return {
-            "statusCode": 500,
-            "body": {"message": (f'Must provide a cluster_name variable '
-                                 f'in uri query string')}
+            "body": {"message":
+                     f'Must provide an environment param in uri query string'}
         }
 
+    cluster_name = query_string_params.get('cluster_name')
+    if cluster_name is None:
+        return {
+            "statusCode": 500,
+            "body": {"message": (f'Must provide a cluster_name '
+                                 f'variable in uri query string')}
+        }
     try:
         CLUSTER_TABLE.update_item(
             Key={
@@ -106,15 +103,13 @@ def clusters_per_environment(event, context):
     """Query cluster status attribute for given environment,
     requires 'environment' query param, or defaults to all clusters"""
 
-    environment = None
     clusters = []
 
-    if event['queryStringParameters']['environment']:
-        environment = event['queryStringParameters']['environment']
+    environment = event.get('queryStringParameters', {}).get('environment')
 
-    items = _query_dynamodb_per_environment(environment)
+    items = _query_dynamodb(environment)
 
-    for cluster in items['Items']:
+    for cluster in items:
         clusters.append(cluster['id'])
 
     return {
@@ -127,18 +122,12 @@ def cluster_status(event, context):
     """Query cluster status attribute for given environment,
     requires 'environment' query param, or defaults to all clusters"""
 
-    environment = None
-    cluster_status = None
     clusters = []
+    query_string_params = event.get('queryStringParameters', {})
+    environment = query_string_params.get('environment')
+    cluster_status = query_string_params.get('cluster_status')
 
-    if event['queryStringParameters']['environment']:
-        environment = event['queryStringParameters']['environment']
-
-    if event['queryStringParameters']['cluster_status']:
-        cluster_status = event['queryStringParameters']['cluster_status']
-
-    items = _query_dynamodb_per_environment_and_status(
-        environment, cluster_status)
+    items = _query_dynamodb(environment, cluster_status)
 
     for cluster in items:
         clusters.append(cluster['id'])
@@ -149,17 +138,13 @@ def cluster_status(event, context):
     }
 
 
-def _query_dynamodb_per_environment_and_status(environment, status):
+def _query_dynamodb(environment, status=None):
+    CLUSTER_TABLE = storage.get_cluster_table()
+    fkey = Key('environment').eq(environment)
+    if status is not None:
+        fkey = fkey & Key('cluster_status').eq(status)
     response = CLUSTER_TABLE.scan(
         ProjectionExpression="id",
-        FilterExpression=Key('environment').eq(environment) & Key('cluster_status').eq(status)  # noqa
+        FilterExpression=fkey
     )
-    return response['Items']
-
-
-def _query_dynamodb_per_environment(environment):
-    response = CLUSTER_TABLE.scan(
-        ProjectionExpression="id",
-        FilterExpression=Key('environment').eq(environment)
-    )
-    return response['Items']
+    return response.get('Items', [])
