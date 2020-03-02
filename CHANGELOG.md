@@ -4,6 +4,12 @@ This file is used to list changes made in each version of hyper-kube-config.
 
 ## unreleased
 
+## 0.2.0 (2020-03-02)
+- [Zane Williamson] - Moving moto to dev-packages, changing short flag for environment from '-g' to '-e' (breaking change)
+
+## 0.1.8 (2020-03-02)
+- [Christopher Zorn] - Adding tests, adding get-cluster-for-environment lookup, new storage module
+
 ## 0.1.7 (2019-10-18)
 - [Swarup Donepudi]
   - Provide the option to user for `get` and `get-all` to merge with existing `~/.kube/config` or whatever the user passes using the option `-k`
