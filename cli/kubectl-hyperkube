@@ -278,6 +278,24 @@ def get_cluster_status(ctx, environment, status):
         print(f'Request error: {err}')
 
 
+@cli.command()
+@click.option('--environment', '-g')
+@click.pass_context
+def get_cluster_for_environment(ctx, environment):
+    """Get clusters of a given status in a particular environment"""
+    req_path = (f'{ctx.obj["url"]}/{ctx.obj["stage"]}'
+                f'/clusters/clusters-per-environment')
+    if environment is not None:
+        req_path += f'?environment={environment}'
+    try:
+        r = requests.get(req_path, headers=ctx.obj['headers'])
+        pprint(r.json())
+        if r.status_code == 404:
+            sys.exit(1)
+    except requests.exceptions.RequestException as err:
+        print(f'Request error: {err}')
+
+
 def _load_config(config):
     """Loads yaml config to dict object"""
     try:

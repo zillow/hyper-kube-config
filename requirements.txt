@@ -1,2 +1,5 @@
-boto3==1.9.22
+boto3==1.12.10
 cryptography==2.4.2
+click==7.0
+pyyaml==5.1
+requests==v2.23.0

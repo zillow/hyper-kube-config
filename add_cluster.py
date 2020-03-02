@@ -1,11 +1,10 @@
 import json
-import os
-import boto3
-from util import validate_config_input, validate_unique_cluster_name
 
-DYNAMODB = boto3.resource('dynamodb')
-CLUSTER_TABLE_NAME = os.environ['DYNAMODB_TABLE_K8_CLUSTERS']
-CLUSTER_TABLE = DYNAMODB.Table(CLUSTER_TABLE_NAME)
+import boto3
+
+from util import validate_config_input, validate_unique_cluster_name
+import storage
+
 SECRETS_CLIENT = boto3.client('secretsmanager')
 
 
@@ -17,6 +16,7 @@ def add_cluster(event, context):
     cluster_config = json.loads(event['body'])
     cluster_users = cluster_config['users']
 
+    cluster_table = storage.get_cluster_table()
     for cluster in get_clusters(cluster_config):
         try:
             cluster_name = cluster['name']
@@ -28,7 +28,7 @@ def add_cluster(event, context):
             raise err
 
         # Put into dynamodb cluster info
-        if validate_unique_cluster_name(cluster_name, CLUSTER_TABLE) is None:
+        if validate_unique_cluster_name(cluster_name, cluster_table) is None:
             names = [user['name'] for user in get_users(cluster_config)]
 
             for name in get_users(cluster_config):
@@ -37,7 +37,7 @@ def add_cluster(event, context):
                     update_cluster_users_secret_name(
                         cluster_name, name['name'], user_data, cluster_users)
 
-            CLUSTER_TABLE.put_item(
+            cluster_table.put_item(
                 Item={
                     'id': cluster_name,
                     'server': cluster_server,
