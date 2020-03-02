@@ -1,13 +1,11 @@
 import json
-import os
 
 import boto3
 
 from util import validate_unique_cluster_name
+import storage
 
-DYNAMODB = boto3.resource('dynamodb')
-CLUSTER_TABLE_NAME = os.environ['DYNAMODB_TABLE_K8_CLUSTERS']
-CLUSTER_TABLE = DYNAMODB.Table(CLUSTER_TABLE_NAME)
+
 SECRETS_CLIENT = boto3.client('secretsmanager')
 
 
@@ -32,7 +30,7 @@ def get_k8_config(event, context):
 
 
 def _generate_cluster_config(clusters):
-
+    CLUSTER_TABLE = storage.get_cluster_table()
     config = {
         "apiVersion": "v1",
         "kind": "Config",
@@ -106,6 +104,7 @@ def _generate_cluster_config(clusters):
 def _cluster_list():
     """Scan for all cluster ids and return list"""
 
+    CLUSTER_TABLE = storage.get_cluster_table()
     clusters = []
     cluster_items = CLUSTER_TABLE.scan()
 
