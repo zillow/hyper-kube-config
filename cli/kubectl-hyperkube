@@ -218,7 +218,7 @@ def add_pem(ctx, cluster, pem):
 
 
 @cli.command()
-@click.option('--environment', '-g')
+@click.option('--environment', '-e')
 @click.option('--status', '-s')
 @click.option('--cluster', '-g', required=True)
 @click.pass_context
@@ -258,7 +258,7 @@ def set_cluster_status(ctx, environment, status, cluster):
 
 
 @cli.command()
-@click.option('--environment', '-g', required=True)
+@click.option('--environment', '-e', required=True)
 @click.option('--status', '-s', required=True)
 @click.pass_context
 def get_cluster_status(ctx, environment, status):
@@ -279,7 +279,7 @@ def get_cluster_status(ctx, environment, status):
 
 
 @cli.command()
-@click.option('--environment', '-g')
+@click.option('--environment', '-e')
 @click.pass_context
 def get_cluster_for_environment(ctx, environment):
     """Get clusters of a given status in a particular environment"""
