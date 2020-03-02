@@ -15,10 +15,8 @@ class TestAddCluster(unittest.TestCase):
         self.table_name = "hyper-kube-config-test"
         self.cluster_name = 'test_cluster_name'
         os.environ["DYNAMODB_TABLE_K8_CLUSTERS"] = self.table_name
-        try:
-            cluster_status.storage.create_table(self.table_name)
-        except Exception as e:
-            print("Error in creating table", e)
+        # Delete just incase
+        cluster_status.storage.delete_table(self.table_name)
         self.dbtable = cluster_status.storage.create_table(self.table_name)
         self.dbtable.put_item(
             Item={

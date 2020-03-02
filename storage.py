@@ -2,16 +2,16 @@ import os
 
 import boto3
 
-
 CLUSTER_TABLE = None
+AWS_DEFAULT_REGION = os.environ.get('AWS_DEFAULT_REGION', 'us-west-2')
 
 
-def get_cluster_table(cluster_table_name=None):
+def get_cluster_table(cluster_table_name=None, region_name=AWS_DEFAULT_REGION):
     """
     Get the dynamodb cluster table.
     """
     global CLUSTER_TABLE
-    dynamodb = boto3.resource('dynamodb')
+    dynamodb = boto3.resource('dynamodb', region_name=region_name)
     if cluster_table_name is None:
         cluster_table_name = os.environ['DYNAMODB_TABLE_K8_CLUSTERS']
 
@@ -20,8 +20,8 @@ def get_cluster_table(cluster_table_name=None):
     return CLUSTER_TABLE
 
 
-def create_table(table_name):
-    dynamodb = boto3.resource('dynamodb')
+def create_table(table_name, region_name=AWS_DEFAULT_REGION):
+    dynamodb = boto3.resource('dynamodb', region_name=region_name)
     dynamodb.create_table(
         AttributeDefinitions=[
             {
@@ -44,6 +44,11 @@ def create_table(table_name):
     return get_cluster_table(table_name)
 
 
-def delete_table(table_name):
-    dynamodb = boto3.client('dynamodb')
-    dynamodb.delete_table(TableName=table_name)
+def delete_table(table_name, region_name=AWS_DEFAULT_REGION):
+    dynamodb = boto3.client('dynamodb', region_name=region_name)
+    try:
+        dynamodb.delete_table(TableName=table_name)
+        deleted = True
+    except dynamodb.exceptions.ResourceNotFoundException:
+        deleted = False
+    return deleted
