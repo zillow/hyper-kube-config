@@ -195,6 +195,24 @@ def get_pem(ctx, cluster):
 
 
 @cli.command()
+@click.option('--cluster', '-g')
+@click.pass_context
+def remove_pem(ctx, cluster):
+    """Removethe pem file for a specific cluster"""
+
+    try:
+        r = requests.delete(
+            (f'{ctx.obj["url"]}/{ctx.obj["stage"]}'
+             f'/clusters/remove-pem?cluster_name={cluster}'),
+            headers=ctx.obj['headers']
+        )
+        if r.status_code == 404:
+            sys.exit(1)
+    except requests.exceptions.RequestException as err:
+        print(f'Request error: {err}')
+
+
+@cli.command()
 @click.option('--cluster', '-g', required=True)
 @click.option('--pem', '-p', required=True)
 @click.pass_context

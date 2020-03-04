@@ -110,6 +110,13 @@ functions:
           path: clusters/get-pem
           method: get
           private: true
+  remove_pem:
+    handler: pem.remove_pem
+    events:
+      - http:
+          path: clusters/remove-pem
+          method: delete
+          private: true
   list_clusters:
     handler: list_clusters.list_clusters
     events:
