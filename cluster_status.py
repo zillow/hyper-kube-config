@@ -1,9 +1,16 @@
 import json
+import logging
+import os
 
 from boto3.dynamodb.conditions import Key
-
+# from boto3.dynamodb.types import TypeDeserializer
 
 import storage
+
+
+logger = logging.getLogger('cluster_status')
+if os.environ.get('DEBUG'):
+    logger.setLevel(logging.DEBUG)
 
 
 def set_cluster_status(event, context):
@@ -46,7 +53,7 @@ def set_cluster_status(event, context):
         }
     except Exception:
         failed_txt = f'Failed to update cluster status for {cluster_name}'
-        print(failed_txt)
+        logger.exception(failed_txt)
         return {
             "statusCode": 500,
             "body": {"message": failed_txt}
@@ -138,7 +145,82 @@ def cluster_status(event, context):
     }
 
 
-def _query_dynamodb(environment, status=None):
+def set_cluster_metadata(event, context):
+    """Set the metadata of a cluster.
+    metadata is a json blob use for describing extra details about a cluster.
+    """
+
+    CLUSTER_TABLE = storage.get_cluster_table()
+    query_string_params = event.get('queryStringParameters', {})
+
+    metadata = event.get('body', {})
+
+    cluster_name = query_string_params.get('cluster_name')
+    if cluster_name is None:
+        return {
+            "statusCode": 500,
+            "body": {"message": (f'Must provide a cluster_name '
+                                 f'variable in uri query string')}
+        }
+
+    try:
+        CLUSTER_TABLE.update_item(
+            Key={
+                'id': cluster_name,
+            },
+            UpdateExpression="set metadata = :md",
+            ExpressionAttributeValues={
+                ':md': metadata
+            },
+            ReturnValues="UPDATED_NEW"
+        )
+        return {
+            "statusCode": 200,
+            "body": {"message": (f'Updated cluster status for {cluster_name} '
+                                 f'to {cluster_status}')}
+        }
+    except Exception:
+        failed_txt = f'Failed to update cluster status for {cluster_name}'
+        logger.exception(failed_txt)
+        return {
+            "statusCode": 500,
+            "body": {"message": failed_txt}
+        }
+
+
+def get_cluster_metadata(event, context):
+    """Get the metadata of a cluster.
+    metadata is a json blob use for describing extra details about a cluster.
+    """
+
+    CLUSTER_TABLE = storage.get_cluster_table()
+    query_string_params = event.get('queryStringParameters', {})
+
+    cluster_name = query_string_params.get('cluster_name')
+    if cluster_name is None:
+        return {
+            "statusCode": 500,
+            "body": {"message": (f'Must provide a cluster_name '
+                                 f'variable in uri query string')}
+        }
+    status_code = 404
+    db_response = CLUSTER_TABLE.get_item(
+        Key={
+            'id': cluster_name,
+        }
+    )
+    item = None
+    if 'Item' in db_response:
+        status_code = 200
+        # deserializer = TypeDeserializer()
+        # item = deserializer.deserialize(db_response['Item'])
+        item = db_response['Item']
+    response = {'statusCode': status_code, "body": json.dumps(item)}
+
+    return response
+
+
+def _query_dynamodb(environment, status=None, metadata=False):
     CLUSTER_TABLE = storage.get_cluster_table()
     fkey = Key('environment').eq(environment)
     if status is not None:
