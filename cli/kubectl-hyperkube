@@ -296,6 +296,47 @@ def get_cluster_for_environment(ctx, environment):
         print(f'Request error: {err}')
 
 
+@cli.command()
+@click.option('--metadata-file', '-f')
+@click.option('--cluster', '-g', required=True)
+@click.pass_context
+def set_cluster_metadata(ctx, metadata_file, cluster):
+    """Set cluster metadata """
+
+    metadata = _load_config(metadata_file)
+    try:
+        print(f'Setting cluster {cluster} metadata.')
+        r = requests.post(
+            (f'{ctx.obj["url"]}/{ctx.obj["stage"]}'
+             f'/clusters/set-cluster-metadata?cluster_name={cluster}'),
+            headers=ctx.obj['headers'],
+            data=metadata
+        )
+        if r.status_code == 404:
+            sys.exit(1)
+    except requests.exceptions.RequestException as err:
+        print(f'Request error: {err}')
+
+
+@cli.command()
+@click.option('--cluster', '-g', required=True)
+@click.pass_context
+def get_cluster_metadata(ctx, cluster):
+    """Get cluster metadata for a give cluster name"""
+
+    try:
+        r = requests.get(
+            (f'{ctx.obj["url"]}/{ctx.obj["stage"]}'
+             f'/clusters/get-cluster-metadata?cluster_name={cluster}'),
+            headers=ctx.obj['headers']
+        )
+        pprint(r.json())
+        if r.status_code == 404:
+            sys.exit(1)
+    except requests.exceptions.RequestException as err:
+        print(f'Request error: {err}')
+
+
 def _load_config(config):
     """Loads yaml config to dict object"""
     try:
