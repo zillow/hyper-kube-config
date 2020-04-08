@@ -118,7 +118,7 @@ functions:
           method: get
           private: true
   cluster_status:
-    handler: cluster_status.cluster_status 
+    handler: cluster_status.cluster_status
     events:
       - http:
           path: clusters/cluster-status
@@ -145,7 +145,21 @@ functions:
           path: clusters/set-cluster-status
           method: get
           private: true
-          
+  set_cluster_metadata:
+    handler: cluster_status.set_cluster_metadata
+    events:
+      - http:
+          path: clusters/set-cluster-metadata
+          method: post
+          private: true
+  get_cluster_metadata:
+    handler: cluster_status.set_cluster_metadata
+    events:
+      - http:
+          path: clusters/get-cluster-metadata
+          method: get
+          private: true
+
 resources:
   Resources:
     KubeAuthStoreClustersDynamoDbTable:
