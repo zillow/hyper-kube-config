@@ -1,0 +1,4 @@
+include:
+- file: templates/applications.gitlab-ci.yml
+  project: itx/ci-cd/application-pipeline
+  ref: master
