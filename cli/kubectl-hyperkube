@@ -187,7 +187,7 @@ def get_pem(ctx, cluster):
              f'/clusters/get-pem?cluster_name={cluster}'),
             headers=ctx.obj['headers']
         )
-        pprint(r.text)
+        print(r.text)
         if r.status_code == 404:
             sys.exit(1)
     except requests.exceptions.RequestException as err:
