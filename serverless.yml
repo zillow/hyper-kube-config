@@ -6,11 +6,11 @@ plugins:
 custom:
   pythonRequirements:
     noDeploy: []
-    dockerizePip: true
+    dockerizePip: false
 
 provider:
   name: aws
-  runtime: python3.6
+  runtime: python3.8
   region: us-west-2
   apiKeys:
     - ${self:service}-${opt:stage, self:provider.stage}-key

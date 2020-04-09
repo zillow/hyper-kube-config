@@ -102,7 +102,6 @@ kubectl hyperkube get-cluster-status --status active --environment prod
 ## Requirements
 
 * [Serverless](https://serverless.com/) - Serverless Framework
-* [Docker](https://docker.com) - For serverless deploy
 * [serverless-python-requirements](https://www.npmjs.com/package/serverless-python-requirements) plugin. Uses Docker and Pip to package a newer vesion of Boto3 for AWS Lambda function use. AWS Lambda boto3 version by default doesn't have AWS Secrets Manager support for tags.
 * [click](https://click.palletsprojects.com/en/7.x/) - for hyperkube kubectl plugin
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) - version 1.12 or higher recommended for stable plugin support.
@@ -110,6 +109,8 @@ kubectl hyperkube get-cluster-status --status active --environment prod
 ### Deploying Serverless API
 
 ```bash
+pipenv install
+pipenv shell
 sls deploy \
   --stage dev \
   --product k8s \
