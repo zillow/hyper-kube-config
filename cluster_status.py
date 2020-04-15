@@ -23,16 +23,18 @@ def set_cluster_status(event, context):
     if cluster_status is None:
         return {
             "statusCode": 500,
-            "body": {"message":
-                     f'Must provide a status variable in uri query string'}
+            "body": json.dumps(
+                {"message":
+                 f'Must provide a status variable in uri query string'})
         }
 
     cluster_name = query_string_params.get('cluster_name')
     if cluster_name is None:
         return {
             "statusCode": 500,
-            "body": {"message": (f'Must provide a cluster_name '
-                                 f'variable in uri query string')}
+            "body": json.dumps(
+                {"message": (f'Must provide a cluster_name '
+                             f'variable in uri query string')})
         }
 
     try:
@@ -48,15 +50,16 @@ def set_cluster_status(event, context):
         )
         return {
             "statusCode": 200,
-            "body": {"message": (f'Updated cluster status for {cluster_name} '
-                                 f'to {cluster_status}')}
+            "body": json.dumps(
+                {"message": (f'Updated cluster status for {cluster_name} '
+                             f'to {cluster_status}')})
         }
     except Exception:
         failed_txt = f'Failed to update cluster status for {cluster_name}'
         logger.exception(failed_txt)
         return {
             "statusCode": 500,
-            "body": {"message": failed_txt}
+            "body": json.dumps({"message": failed_txt})
         }
 
 
@@ -69,16 +72,18 @@ def set_cluster_environment(event, context):
     if environment is None:
         return {
             "statusCode": 500,
-            "body": {"message":
-                     f'Must provide an environment param in uri query string'}
+            "body": json.dumps(
+                {"message":
+                 f'Must provide an environment param in uri query string'})
         }
 
     cluster_name = query_string_params.get('cluster_name')
     if cluster_name is None:
         return {
             "statusCode": 500,
-            "body": {"message": (f'Must provide a cluster_name '
-                                 f'variable in uri query string')}
+            "body": json.dumps(
+                {"message": (f'Must provide a cluster_name '
+                             f'variable in uri query string')})
         }
     try:
         CLUSTER_TABLE.update_item(
@@ -95,14 +100,14 @@ def set_cluster_environment(event, context):
                f'to {environment}')
         return {
             "statusCode": 200,
-            "body": {"message": msg}
+            "body": json.dumps({"message": msg})
         }
     except Exception:
         failed_txt = f'Failed to update cluster environment for {cluster_name}'
         print(failed_txt)
         return {
             "statusCode": 500,
-            "body": {"message": failed_txt}
+            "body": json.dumps({"message": failed_txt})
         }
 
 
@@ -177,7 +182,9 @@ def set_cluster_metadata(event, context):
         )
         return {
             "statusCode": 200,
-            "body": {"message": f'Updated cluster metadata for {cluster_name}'}
+            "body": json.dumps(
+                {"message": f'Updated cluster metadata for {cluster_name}'}
+                )
         }
     except Exception:
         failed_txt = f'Failed to update cluster metadata for {cluster_name}'
@@ -185,7 +192,7 @@ def set_cluster_metadata(event, context):
         logger.error(json.dumps(event))
         return {
             "statusCode": 500,
-            "body": {"message": failed_txt}
+            "body": json.dumps({"message": failed_txt})
         }
 
 
@@ -201,8 +208,9 @@ def get_cluster_metadata(event, context):
     if cluster_name is None:
         return {
             "statusCode": 500,
-            "body": {"message": (f'Must provide a cluster_name '
-                                 f'variable in uri query string')}
+            "body": json.dumps(
+                {"message": (f'Must provide a cluster_name '
+                             f'variable in uri query string')})
         }
     status_code = 404
     db_response = CLUSTER_TABLE.get_item(
