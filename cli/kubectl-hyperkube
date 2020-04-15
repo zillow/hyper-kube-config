@@ -310,10 +310,11 @@ def set_cluster_metadata(ctx, metadata_file, cluster):
             (f'{ctx.obj["url"]}/{ctx.obj["stage"]}'
              f'/clusters/set-cluster-metadata?cluster_name={cluster}'),
             headers=ctx.obj['headers'],
-            data=metadata
+            data=json.dumps(metadata)
         )
         if r.status_code == 404:
             sys.exit(1)
+        pprint(r.json())
     except requests.exceptions.RequestException as err:
         print(f'Request error: {err}')
 
