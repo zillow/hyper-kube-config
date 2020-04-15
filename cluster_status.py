@@ -154,7 +154,8 @@ def set_cluster_metadata(event, context):
     query_string_params = event.get('queryStringParameters', {})
 
     metadata = event.get('body', {})
-
+    if isinstance(metadata, str):
+        metadata = json.loads(metadata)
     cluster_name = query_string_params.get('cluster_name')
     if cluster_name is None:
         return {
@@ -209,13 +210,12 @@ def get_cluster_metadata(event, context):
             'id': cluster_name,
         }
     )
-    item = None
+    metadata = {}
     if 'Item' in db_response:
         status_code = 200
-        # deserializer = TypeDeserializer()
-        # item = deserializer.deserialize(db_response['Item'])
-        item = db_response['Item']
-    response = {'statusCode': status_code, "body": json.dumps(item)}
+        metadata = db_response['Item'].get('metadata', {})
+    metadata['id'] = cluster_name
+    response = {'statusCode': status_code, "body": json.dumps(metadata)}
 
     return response
 
