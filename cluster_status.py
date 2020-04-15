@@ -210,10 +210,11 @@ def get_cluster_metadata(event, context):
             'id': cluster_name,
         }
     )
-    metadata = None
+    metadata = {}
     if 'Item' in db_response:
         status_code = 200
         metadata = db_response['Item'].get('metadata', {})
+    metadata['id'] = cluster_name
     response = {'statusCode': status_code, "body": json.dumps(metadata)}
 
     return response
