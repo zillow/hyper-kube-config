@@ -153,7 +153,7 @@ functions:
           method: post
           private: true
   get_cluster_metadata:
-    handler: cluster_status.set_cluster_metadata
+    handler: cluster_status.get_cluster_metadata
     events:
       - http:
           path: clusters/get-cluster-metadata
