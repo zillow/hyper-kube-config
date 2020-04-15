@@ -48,7 +48,5 @@ class ClusterMetadataTestCase(unittest.TestCase):
         self.assertIn('body', metadata)
         body = cluster_status.json.loads(metadata['body'])
         self.assertEqual('test_cluster_name', body.get('id'))
-        self.assertIn('metadata', body)
-        metadata = body['metadata']
-        self.assertIn('test_info', metadata)
-        self.assertEqual('testing 1 2 3', metadata.get('test_info'))
+        self.assertIn('test_info', body)
+        self.assertEqual('testing 1 2 3', body['test_info'])
