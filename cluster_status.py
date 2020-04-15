@@ -1,9 +1,9 @@
+import decimal
 import json
 import logging
 import os
 
 from boto3.dynamodb.conditions import Key
-# from boto3.dynamodb.types import TypeDeserializer
 
 import storage
 
@@ -11,6 +11,13 @@ import storage
 logger = logging.getLogger('cluster_status')
 if os.environ.get('DEBUG'):
     logger.setLevel(logging.DEBUG)
+
+
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, decimal.Decimal):
+            return str(o)
+        return super(DecimalEncoder, self).default(o)
 
 
 def set_cluster_status(event, context):
@@ -227,7 +234,8 @@ def get_cluster_metadata(event, context):
         metadata['environment'] = db_response['Item'].get('environment')
         metadata['status'] = db_response['Item'].get('status')
     metadata['id'] = cluster_name
-    response = {'statusCode': status_code, "body": json.dumps(metadata)}
+    body = json.dumps(metadata, cls=DecimalEncoder)
+    response = {'statusCode': status_code, "body": body}
 
     return response
 
