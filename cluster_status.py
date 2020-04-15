@@ -154,8 +154,6 @@ def set_cluster_metadata(event, context):
     query_string_params = event.get('queryStringParameters', {})
 
     metadata = event.get('body', {})
-    if isinstance(metadata, str):
-        metadata = json.loads(metadata)
     cluster_name = query_string_params.get('cluster_name')
     if cluster_name is None:
         return {
@@ -165,6 +163,8 @@ def set_cluster_metadata(event, context):
         }
 
     try:
+        if isinstance(metadata, str):
+            metadata = json.loads(metadata)
         CLUSTER_TABLE.update_item(
             Key={
                 'id': cluster_name,
@@ -177,12 +177,12 @@ def set_cluster_metadata(event, context):
         )
         return {
             "statusCode": 200,
-            "body": {"message": (f'Updated cluster status for {cluster_name} '
-                                 f'to {cluster_status}')}
+            "body": {"message": f'Updated cluster metadata for {cluster_name}'
         }
     except Exception:
-        failed_txt = f'Failed to update cluster status for {cluster_name}'
+        failed_txt = f'Failed to update cluster metadata for {cluster_name}'
         logger.exception(failed_txt)
+        logger.error(json.dumps(event))
         return {
             "statusCode": 500,
             "body": {"message": failed_txt}
