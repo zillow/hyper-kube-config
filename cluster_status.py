@@ -177,7 +177,7 @@ def set_cluster_metadata(event, context):
         )
         return {
             "statusCode": 200,
-            "body": {"message": f'Updated cluster metadata for {cluster_name}'
+            "body": {"message": f'Updated cluster metadata for {cluster_name}'}
         }
     except Exception:
         failed_txt = f'Failed to update cluster metadata for {cluster_name}'
