@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import traceback
 
 from boto3.dynamodb.conditions import Attr, Key
 
@@ -84,8 +85,10 @@ def set_cluster_environment(event, context):
         msg = (f'Updated cluster environment for {cluster_name} '
                f'to {environment}')
         return lambda_result(msg)
-    except Exception:
+    except Exception as e:
         failed_txt = f'Failed to update cluster environment for {cluster_name}'
+        failed_tx += "\nError {} {}".format(
+            str(e), repr(traceback.format_stack()))
         print(failed_txt)
         return lambda_result({"message": failed_txt}, status_code=500)
 
