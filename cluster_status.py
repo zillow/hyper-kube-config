@@ -37,10 +37,9 @@ def set_cluster_status(event, context):
             Key={
                 'id': cluster_name,
             },
-            UpdateExpression=("set cluster_status = "
-                              "list_append(cluster_status, :r)"),
+            UpdateExpression="ADD cluster_status :r",
             ExpressionAttributeValues={
-                ':r': cluster_status
+                ':r': [cluster_status]
             },
             ReturnValues="UPDATED_NEW"
         )
@@ -76,10 +75,9 @@ def set_cluster_environment(event, context):
             Key={
                 'id': cluster_name,
             },
-            UpdateExpression=("set environment = "
-                              "list_append(environment, :e)"),
+            UpdateExpression="ADD environment :e",
             ExpressionAttributeValues={
-                ':e': environment
+                ':e': [environment]
             },
             ReturnValues="UPDATED_NEW"
         )
