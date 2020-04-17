@@ -75,10 +75,13 @@ class TestAddCluster(unittest.TestCase):
         self.assertEqual(200, res.get('statusCode'))
         res = cluster_status.set_cluster_environment(event, {})
         self.assertEqual(200, res.get('statusCode'))
+        CLUSTER_TABLE = cluster_status.storage.get_cluster_table()
+        response = CLUSTER_TABLE.scan()
+        print(response)
         event = {'queryStringParameters':
                  {'environment': 'test'}}
         status = cluster_status.clusters_per_environment(event, {})
-        self.assertEqual(200, status.get('statusCode'))
+        self.assertEqual(200, status.get('statusCode'), (status, response))
         self.assertEqual('["test_cluster_name"]', status.get('body'))
         event = {'queryStringParameters':
                  {'environment': 'thisiswrong'}}
