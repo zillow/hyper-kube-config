@@ -3,11 +3,15 @@
 import click
 import json
 from pathlib import Path
-from pprint import pprint
+
 import requests
 import sys
 import yaml
 import os
+
+
+def hkc_print(message, *args, **kwargs):
+    print(json.dumps(message, indent=4), *args, **kwargs)
 
 
 @click.group()
@@ -33,7 +37,7 @@ def list(ctx):
             f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/list',
             headers=ctx.obj['headers']
         )
-        pprint(sorted(r.json()))
+        hkc_print(sorted(r.json()))
         if r.status_code != 200:
             sys.exit(1)
     except requests.exceptions.RequestException as err:
@@ -55,7 +59,7 @@ def add(ctx, k8s_config):
             headers=ctx.obj['headers'],
             data=k8s_cfg
         )
-        print(json.dumps(r.json(), indent=4))
+        hkc_print(r.json())
         if r.status_code == 404:
             sys.exit(1)
     except requests.exceptions.RequestException as err:
@@ -78,7 +82,7 @@ def add_ca_key(ctx, cluster_name, ca_key):
             headers=ctx.obj['headers'],
             data=post
         )
-        pprint(r.json())
+        hkc_print(r.json())
     except requests.exceptions.RequestException as err:
         print(f'Request error: {err}')
 
@@ -95,7 +99,7 @@ def remove_ca_key(ctx, cluster_name):
              f'/clusters/remove-ca-key?{cluster_name}'),
             headers=ctx.obj['headers']
         )
-        pprint(r.json())
+        hkc_print(r.json())
         if r.status_code == 404:
             sys.exit(1)
     except requests.exceptions.RequestException as err:
@@ -114,7 +118,7 @@ def remove(ctx, cluster_to_remove):
             headers=ctx.obj['headers'],
             data=json.dumps({"cluster_name": cluster_to_remove})
         )
-        pprint(r.json())
+        hkc_print(r.json())
         if r.status_code == 404:
             sys.exit(1)
     except requests.exceptions.RequestException as err:
@@ -210,7 +214,7 @@ def add_pem(ctx, cluster, pem):
             headers=ctx.obj['headers'],
             data=pem_data
         )
-        pprint(r.json())
+        hkc_print(r.json())
         if r.status_code == 404:
             sys.exit(1)
     except requests.exceptions.RequestException as err:
@@ -289,7 +293,7 @@ def get_cluster_for_environment(ctx, environment):
         req_path += f'?environment={environment}'
     try:
         r = requests.get(req_path, headers=ctx.obj['headers'])
-        print(json.dumps(r.json()))
+        hkc_print(r.json())
         if r.status_code == 404:
             sys.exit(1)
     except requests.exceptions.RequestException as err:
@@ -314,7 +318,7 @@ def set_cluster_metadata(ctx, metadata_file, cluster):
         )
         if r.status_code == 404:
             sys.exit(1)
-        print(json.dumps(r.json()))
+        hkc_print(r.json())
     except requests.exceptions.RequestException as err:
         print(f'Request error: {err}')
 
@@ -331,7 +335,7 @@ def get_cluster_metadata(ctx, cluster):
              f'/clusters/get-cluster-metadata?cluster_name={cluster}'),
             headers=ctx.obj['headers']
         )
-        print(json.dumps(r.json()))
+        hkc_print(r.json())
         if r.status_code == 404:
             sys.exit(1)
     except requests.exceptions.RequestException as err:
