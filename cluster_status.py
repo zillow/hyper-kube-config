@@ -78,7 +78,7 @@ def set_cluster_environment(event, context):
             },
             UpdateExpression="ADD environment :e",
             ExpressionAttributeValues={
-                ':e': [environment]
+                ':e': set(environment)
             },
             ReturnValues="UPDATED_NEW"
         )
@@ -87,7 +87,7 @@ def set_cluster_environment(event, context):
         return lambda_result(msg)
     except Exception as e:
         failed_txt = f'Failed to update cluster environment for {cluster_name}'
-        failed_txt += "\nError {} {}".format(
+        failed_txt += "\n{} \n{}".format(
             str(e), repr(traceback.format_stack()))
         print(failed_txt)
         return lambda_result({"message": failed_txt}, status_code=500)
