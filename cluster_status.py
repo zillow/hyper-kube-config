@@ -87,7 +87,7 @@ def set_cluster_environment(event, context):
         return lambda_result(msg)
     except Exception as e:
         failed_txt = f'Failed to update cluster environment for {cluster_name}'
-        failed_tx += "\nError {} {}".format(
+        failed_txt += "\nError {} {}".format(
             str(e), repr(traceback.format_stack()))
         print(failed_txt)
         return lambda_result({"message": failed_txt}, status_code=500)
