@@ -1,23 +1,16 @@
-import decimal
 import json
 import logging
 import os
 
-from boto3.dynamodb.conditions import Key
+from boto3.dynamodb.conditions import Attr
 
 import storage
+from util import lambda_result
 
 
 logger = logging.getLogger('cluster_status')
 if os.environ.get('DEBUG'):
     logger.setLevel(logging.DEBUG)
-
-
-class DecimalEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, decimal.Decimal):
-            return str(o)
-        return super(DecimalEncoder, self).default(o)
 
 
 def set_cluster_status(event, context):
@@ -28,46 +21,36 @@ def set_cluster_status(event, context):
     query_string_params = event.get('queryStringParameters', {})
     cluster_status = query_string_params.get('cluster_status')
     if cluster_status is None:
-        return {
-            "statusCode": 500,
-            "body": json.dumps(
-                {"message":
-                 f'Must provide a status variable in uri query string'})
-        }
+        return lambda_result(
+            {"message": f'Must provide a status variable in uri query string'},
+            status_code=500)
 
     cluster_name = query_string_params.get('cluster_name')
     if cluster_name is None:
-        return {
-            "statusCode": 500,
-            "body": json.dumps(
-                {"message": (f'Must provide a cluster_name '
-                             f'variable in uri query string')})
-        }
+        return lambda_result(
+            {"message": (f'Must provide a cluster_name '
+                         f'variable in uri query string')},
+            status_code=500)
 
     try:
         CLUSTER_TABLE.update_item(
             Key={
                 'id': cluster_name,
             },
-            UpdateExpression="set cluster_status = :r",
+            UpdateExpression=("set cluster_status = "
+                              "list_append(cluster_status, :r)"),
             ExpressionAttributeValues={
                 ':r': cluster_status
             },
             ReturnValues="UPDATED_NEW"
         )
-        return {
-            "statusCode": 200,
-            "body": json.dumps(
-                {"message": (f'Updated cluster status for {cluster_name} '
-                             f'to {cluster_status}')})
-        }
+        return lambda_result(
+            {"message": (f'Updated cluster status for {cluster_name} '
+                         f'to {cluster_status}')})
     except Exception:
         failed_txt = f'Failed to update cluster status for {cluster_name}'
         logger.exception(failed_txt)
-        return {
-            "statusCode": 500,
-            "body": json.dumps({"message": failed_txt})
-        }
+        return lambda_result({"message": failed_txt}, status_code=500)
 
 
 def set_cluster_environment(event, context):
@@ -77,27 +60,24 @@ def set_cluster_environment(event, context):
     query_string_params = event.get('queryStringParameters', {})
     environment = query_string_params.get('environment')
     if environment is None:
-        return {
-            "statusCode": 500,
-            "body": json.dumps(
-                {"message":
-                 f'Must provide an environment param in uri query string'})
-        }
+        return lambda_result(
+            {"message":
+             f'Must provide an environment param in uri query string'},
+            status_code=500)
 
     cluster_name = query_string_params.get('cluster_name')
     if cluster_name is None:
-        return {
-            "statusCode": 500,
-            "body": json.dumps(
-                {"message": (f'Must provide a cluster_name '
-                             f'variable in uri query string')})
-        }
+        return lambda_result(
+            {"message": (f'Must provide a cluster_name '
+                         f'variable in uri query string')},
+            status_code=500)
     try:
         CLUSTER_TABLE.update_item(
             Key={
                 'id': cluster_name,
             },
-            UpdateExpression="set environment = :e",
+            UpdateExpression=("set environment = "
+                              "list_append(environment, :e)"),
             ExpressionAttributeValues={
                 ':e': environment
             },
@@ -105,17 +85,11 @@ def set_cluster_environment(event, context):
         )
         msg = (f'Updated cluster environment for {cluster_name} '
                f'to {environment}')
-        return {
-            "statusCode": 200,
-            "body": json.dumps({"message": msg})
-        }
+        return lambda_result(msg)
     except Exception:
         failed_txt = f'Failed to update cluster environment for {cluster_name}'
         print(failed_txt)
-        return {
-            "statusCode": 500,
-            "body": json.dumps({"message": failed_txt})
-        }
+        return lambda_result({"message": failed_txt}, status_code=500)
 
 
 def clusters_per_environment(event, context):
@@ -131,10 +105,7 @@ def clusters_per_environment(event, context):
     for cluster in items:
         clusters.append(cluster['id'])
 
-    return {
-        "statusCode": 200,
-        "body": json.dumps(clusters)
-    }
+    return lambda_result(clusters)
 
 
 def cluster_status(event, context):
@@ -151,10 +122,7 @@ def cluster_status(event, context):
     for cluster in items:
         clusters.append(cluster['id'])
 
-    return {
-        "statusCode": 200,
-        "body": json.dumps(clusters)
-    }
+    return lambda_result(clusters)
 
 
 def set_cluster_metadata(event, context):
@@ -168,11 +136,10 @@ def set_cluster_metadata(event, context):
     metadata = event.get('body', {})
     cluster_name = query_string_params.get('cluster_name')
     if cluster_name is None:
-        return {
-            "statusCode": 500,
-            "body": {"message": (f'Must provide a cluster_name '
-                                 f'variable in uri query string')}
-        }
+        return lambda_result(
+            {"message": (f'Must provide a cluster_name '
+                         f'variable in uri query string')},
+            status_code=500)
 
     try:
         if isinstance(metadata, str):
@@ -187,20 +154,14 @@ def set_cluster_metadata(event, context):
             },
             ReturnValues="UPDATED_NEW"
         )
-        return {
-            "statusCode": 200,
-            "body": json.dumps(
-                {"message": f'Updated cluster metadata for {cluster_name}'}
-                )
-        }
+        return lambda_result(
+            {"message": f'Updated cluster metadata for {cluster_name}'}
+        )
     except Exception:
         failed_txt = f'Failed to update cluster metadata for {cluster_name}'
         logger.exception(failed_txt)
         logger.error(json.dumps(event))
-        return {
-            "statusCode": 500,
-            "body": json.dumps({"message": failed_txt})
-        }
+        return lambda_result({"message": failed_txt}, status_code=500)
 
 
 def get_cluster_metadata(event, context):
@@ -234,17 +195,14 @@ def get_cluster_metadata(event, context):
         metadata['environment'] = db_response['Item'].get('environment')
         metadata['status'] = db_response['Item'].get('status')
     metadata['id'] = cluster_name
-    body = json.dumps(metadata, cls=DecimalEncoder)
-    response = {'statusCode': status_code, "body": body}
-
-    return response
+    return lambda_result(metadata, status_code=status_code)
 
 
 def _query_dynamodb(environment, status=None, metadata=False):
     CLUSTER_TABLE = storage.get_cluster_table()
-    fkey = Key('environment').eq(environment)
+    fkey = Attr('environment').contains(environment)
     if status is not None:
-        fkey = fkey & Key('cluster_status').eq(status)
+        fkey = fkey & Attr('cluster_status').contains(status)
     response = CLUSTER_TABLE.scan(
         ProjectionExpression="id",
         FilterExpression=fkey
