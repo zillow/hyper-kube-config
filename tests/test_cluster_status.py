@@ -62,7 +62,7 @@ class TestAddCluster(unittest.TestCase):
         event = {'queryStringParameters':
                  {'environment': 'test'}}
         status = cluster_status.cluster_status(event, {})
-        self.assertEqual(200, status.get('statusCode'))
+        self.assertEqual(200, status.get('statusCode'), status)
         self.assertEqual('["test_cluster_name"]', status.get('body'))
 
     def test_list_clusters_per_environment(self):
@@ -83,5 +83,5 @@ class TestAddCluster(unittest.TestCase):
         event = {'queryStringParameters':
                  {'environment': 'thisiswrong'}}
         status = cluster_status.clusters_per_environment(event, {})
-        self.assertEqual(200, status.get('statusCode'))
+        self.assertEqual(200, status.get('statusCode'), status)
         self.assertEqual('[]', status.get('body'))
