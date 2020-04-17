@@ -2,7 +2,7 @@ import json
 import logging
 import os
 
-from boto3.dynamodb.conditions import Attr
+from boto3.dynamodb.conditions import Attr, Key
 
 import storage
 from util import lambda_result
@@ -37,9 +37,9 @@ def set_cluster_status(event, context):
             Key={
                 'id': cluster_name,
             },
-            UpdateExpression="ADD cluster_status :r",
+            UpdateExpression="SET cluster_status = :r",
             ExpressionAttributeValues={
-                ':r': [cluster_status]
+                ':r': cluster_status
             },
             ReturnValues="UPDATED_NEW"
         )
@@ -200,7 +200,7 @@ def _query_dynamodb(environment, status=None, metadata=False):
     CLUSTER_TABLE = storage.get_cluster_table()
     fkey = Attr('environment').contains(environment)
     if status is not None:
-        fkey = fkey & Attr('cluster_status').contains(status)
+        fkey = fkey & Key('cluster_status').eq(status)
     response = CLUSTER_TABLE.scan(
         ProjectionExpression="id",
         FilterExpression=fkey
