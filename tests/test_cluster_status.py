@@ -75,14 +75,39 @@ class TestAddCluster(unittest.TestCase):
         self.assertEqual(200, res.get('statusCode'))
         res = cluster_status.set_cluster_environment(event, {})
         self.assertEqual(200, res.get('statusCode'))
-        CLUSTER_TABLE = cluster_status.storage.get_cluster_table()
-        response = CLUSTER_TABLE.scan()
-        print(response)
         event = {'queryStringParameters':
                  {'environment': 'test'}}
         status = cluster_status.clusters_per_environment(event, {})
-        self.assertEqual(200, status.get('statusCode'), (status, response))
+        self.assertEqual(200, status.get('statusCode'), status)
         self.assertEqual('["test_cluster_name"]', status.get('body'))
+        event = {'queryStringParameters':
+                 {'environment': 'thisiswrong'}}
+        status = cluster_status.clusters_per_environment(event, {})
+        self.assertEqual(200, status.get('statusCode'), status)
+        self.assertEqual('[]', status.get('body'))
+
+    def test_list_clusters_per_multiple_environment(self):
+        os.environ["DYNAMODB_TABLE_K8_CLUSTERS"] = self.table_name
+        event = {'queryStringParameters':
+                 {'cluster_status': 'testing',
+                  'environment': 'test',
+                  'cluster_name': 'test_cluster_name'}}
+
+        environments = ['dev', 'stage', 'prod']
+        for env in environments:
+            event['queryStringParameters']['environment'] = env
+            res = cluster_status.set_cluster_status(event, {})
+            self.assertEqual(200, res.get('statusCode'))
+            res = cluster_status.set_cluster_environment(event, {})
+            self.assertEqual(200, res.get('statusCode'))
+
+        for env in environments:
+            event = {'queryStringParameters':
+                     {'environment': env}}
+            status = cluster_status.clusters_per_environment(event, {})
+            self.assertEqual(200, status.get('statusCode'), status)
+            self.assertEqual('["test_cluster_name"]', status.get('body'))
+
         event = {'queryStringParameters':
                  {'environment': 'thisiswrong'}}
         status = cluster_status.clusters_per_environment(event, {})
