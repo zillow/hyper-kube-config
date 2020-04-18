@@ -78,7 +78,7 @@ def set_cluster_environment(event, context):
             },
             UpdateExpression="ADD environment :e",
             ExpressionAttributeValues={
-                ':e': set(environment)
+                ':e': set([environment])
             },
             ReturnValues="UPDATED_NEW"
         )
