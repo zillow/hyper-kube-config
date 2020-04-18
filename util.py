@@ -5,7 +5,10 @@ import json
 class DecimalEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, decimal.Decimal):
-            return str(o)
+            if o % 1 > 0:
+                return float(o)
+            else:
+                return int(o)
         return super(DecimalEncoder, self).default(o)
 
 
