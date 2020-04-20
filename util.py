@@ -1,4 +1,15 @@
+import decimal
 import json
+
+
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, decimal.Decimal):
+            if o % 1 > 0:
+                return float(o)
+            else:
+                return int(o)
+        return super(DecimalEncoder, self).default(o)
 
 
 def validate_config_input(config):
@@ -20,3 +31,14 @@ def validate_unique_cluster_name(cluster_name, cluster_table):
         # XXX - should catch the correct exceptions here.
         item = None
     return item
+
+
+def lambda_result(data, status_code=200, **kwargs):
+    if not isinstance(data, str):
+        data = json.dumps(data, cls=DecimalEncoder)
+    result = {
+        "statusCode": status_code,
+        "body": data
+    }
+    result.update(kwargs)
+    return result
