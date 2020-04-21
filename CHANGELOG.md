@@ -4,7 +4,7 @@ This file is used to list changes made in each version of hyper-kube-config.
 
 ## unreleased
 
-## 0.5.1 (2020-04-20)
+## 0.5.0 (2020-04-20)
 - [Nolan Emirot]
   - Add travis stages (test, lint)
 
