@@ -14,7 +14,25 @@ install:
   - pip install -r requirements.txt
   - pip install -r tests/requirements.txt
 
+<<<<<<< HEAD
 script: flake8 *.py tests cli/kubectl-hyperkube && python -m unittest discover -v -s tests/ -p "*.py"
+=======
+stages:
+  - lint
+  - test
+  
+jobs:
+  include:
+    - stage: lint
+      name: linting
+      script:
+        - flake8 *.py tests cli/kubectl-hyperkube
+    - stage: test
+      name: test
+      dist: bionic
+      python: 3.7
+      script: python -m unittest discover -s tests/ -p "*.py"
+>>>>>>> 432fb8a... feat(travis): add stages
 
 deploy:
   provider: pypi
