@@ -4,6 +4,10 @@ This file is used to list changes made in each version of hyper-kube-config.
 
 ## unreleased
 
+## 0.5.1 (2020-04-20)
+- [Nolan Emirot]
+  - Add travis stages (test, lint)
+
 ## 0.5.0 (2020-04-17)
 - [Christopher Zorn]
   - Make sure returned json in lambda handlers are consistent in cluster status handlers.
