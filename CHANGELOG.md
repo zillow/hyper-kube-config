@@ -4,6 +4,10 @@ This file is used to list changes made in each version of hyper-kube-config.
 
 ## unreleased
 
+## 0.5.1 (2020-04-20)
+- [Christopher Zorn]
+  - Fix json serialization of set objects in cluster metadata return
+
 ## 0.5.0 (2020-04-20)
 - [Nolan Emirot]
   - Add travis stages (test, lint)
