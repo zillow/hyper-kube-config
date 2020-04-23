@@ -4,7 +4,9 @@ import json
 
 class DecimalEncoder(json.JSONEncoder):
     def default(self, o):
-        if isinstance(o, decimal.Decimal):
+        if isinstance(o, set):
+            return list(o)
+        elif isinstance(o, decimal.Decimal):
             if o % 1 > 0:
                 return float(o)
             else:
