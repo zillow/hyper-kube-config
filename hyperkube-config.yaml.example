@@ -1,4 +1,13 @@
 ---
 url: https://xxxxxxxx.execute-api.us-west-2.amazonaws.com
 stage: dev
+
+# If you ask for an API key secured API gateway in your serverless.yml then provide key here
 x_api_key: 1234567891abcfedrtas123454321Z1234567891
+
+# If you request an IAM secured API gateway in your serverless.yml then provide an AWS credential profile to use, defaults to 'default'
+# [https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html#aws-config-file]
+aws_profile: default
+
+# AWS region api gateway endpoint is deployed into
+aws_region: us-west-2

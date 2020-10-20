@@ -30,6 +30,8 @@ jobs:
       dist: bionic
       python: 3.7
       script: 
+        - mkdir -p ~/.aws/
+        - printf "[default]\nregion=us-west-2" > ~/.aws/config
         - python -m unittest discover -v -s tests/ -p "*.py"
     - stage: deploy
       name: deploy

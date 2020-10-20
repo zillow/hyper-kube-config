@@ -108,6 +108,36 @@ kubectl hyperkube get-cluster-status --status active --environment prod
 
 ### Deploying Serverless API
 
+#### Choose authentication method
+
+##### API Key
+
+[Example Serverless Config for API Key Authentication](./serverless.yml.example_api_key)
+
+This config should work out of the box. Feel free to copy to serverless.yml and deploy
+
+##### IAM Authentication
+
+[Example Serverless Config for IAM Authentication](./serverless.yml.example_iam_policy_access)
+
+This configuration will require you to add IAM roles to the allowed principal section. These roles are managed outside the scope of this project.
+
+See the section that has:
+
+```
+  resourcePolicy:
+    - Effect: Allow
+      Principal:
+        AWS:
+          - arn:aws:iam::{{otherAWSAccountID}}:root
+          - arn:aws:iam::{{otherAWSAccountID}}:user/{{otherAWSUserName}}
+          - arn:aws:iam::{{otherAWSAccountID}}:role/{{otherAWSRoleName}}
+```
+
+replace with your roles you would like to grant access.
+
+##### sls deployment
+
 ```bash
 pipenv install
 pipenv shell
