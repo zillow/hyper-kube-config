@@ -1,0 +1,218 @@
+service: hyper-kube-config
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    noDeploy: []
+    dockerizePip: false
+
+provider:
+  name: aws
+  runtime: python3.8
+  region: us-west-2
+
+  iamManagedPolicies:
+    - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "secretsmanager:*"
+      Resource: "arn:aws:secretsmanager:*:*:secret:hyper-kube-config*" 
+    - Effect: "Allow"
+      Action:
+        - "secretsmanager:ListSecrets"
+      Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:*"
+      Resource: "arn:aws:dynamodb:*:*:table/hyper-kube-config*"
+    - Effect: "Allow"
+      Action:
+        - "logs:CreateLogGroup"
+      Resource: "*"
+
+  environment:
+    DYNAMODB_TABLE_K8_CLUSTERS: ${self:service}-${opt:stage, self:provider.stage}-clusters
+
+  stackTags:
+    Environment: ${opt:stage}
+    Team: ${opt:team}
+    Owner: ${opt:owner}
+    Product: ${opt:product}
+    Service: "hyper-kube-config"
+  resourcePolicy:
+    - Effect: Allow
+      Principal:
+        AWS:
+          - arn:aws:iam::{{otherAWSAccountID}}:root
+          - arn:aws:iam::{{otherAWSAccountID}}:user/{{otherAWSUserName}}
+          - arn:aws:iam::{{otherAWSAccountID}}:role/{{otherAWSRoleName}}
+      Action: execute-api:Invoke
+      Resource:
+        - execute-api:/${opt:stage}/POST/clusters/add
+        - execute-api:/${opt:stage}/POST/clusters/add-ca-key
+        - execute-api:/${opt:stage}/POST/clusters/add-pem
+        - execute-api:/${opt:stage}/GET/clusters/cluster-status
+        - execute-api:/${opt:stage}/GET/clusters/clusters-per-environment
+        - execute-api:/${opt:stage}/GET/clusters/get-all-k8-configs
+        - execute-api:/${opt:stage}/GET/clusters/get-cluster-metadata
+        - execute-api:/${opt:stage}/GET/clusters/get-k8s-config
+        - execute-api:/${opt:stage}/GET/clusters/get-pem
+        - execute-api:/${opt:stage}/GET/clusters/list
+        - execute-api:/${opt:stage}/POST/clusters/remove
+        - execute-api:/${opt:stage}/GET/clusters/remove-ca-key
+        - execute-api:/${opt:stage}/GET/clusters/remove-pem
+        - execute-api:/${opt:stage}/POST/clusters/set-cluster-metadata
+        - execute-api:/${opt:stage}/GET/clusters/set-cluster-environment
+        - execute-api:/${opt:stage}/GET/clusters/set-cluster-status
+functions:
+  add_cluster:
+    handler: add_cluster.add_cluster
+    events:
+      - http:
+          path: clusters/add
+          method: post
+          private: true
+          authorizer: aws_iam 
+  add_pem:
+    handler: pem.add_pem
+    events:
+      - http:
+          path: clusters/add-pem
+          method: post
+          private: true
+          authorizer: aws_iam 
+  add_ca_key:
+    handler: ca_key.add_ca_key
+    events:
+      - http:
+          path: clusters/add-ca-key
+          method: post
+          private: true
+          authorizer: aws_iam 
+  remove_ca_key:
+    handler: ca_key.remove_ca_key
+    events:
+      - http:
+          path: clusters/remove-ca-key
+          method: get
+          private: true
+          authorizer: aws_iam 
+  remove_cluster:
+    handler: remove_cluster.remove_cluster
+    events:
+      - http:
+          path: clusters/remove
+          method: post
+          private: true
+          authorizer: aws_iam 
+  remove_pem:
+    handler: pem.remove_pem
+    events:
+      - http:
+          path: clusters/remove-pem
+          method: get
+          private: true
+          authorizer: aws_iam 
+  get_k8s_config_object:
+    handler: get_k8_config.get_k8_config
+    events:
+      - http:
+          path: clusters/get-k8-config
+          method: get
+          private: true
+          authorizer: aws_iam 
+  get_all_k8s_config:
+    handler: get_k8_config.get_all_k8_configs
+    events:
+      - http:
+          path: clusters/get-all-k8-configs
+          method: get
+          private: true
+          authorizer: aws_iam 
+  get_pem:
+    handler: pem.get_pem
+    events:
+      - http:
+          path: clusters/get-pem
+          method: get
+          private: true
+          authorizer: aws_iam 
+  list_clusters:
+    handler: list_clusters.list_clusters
+    events:
+      - http:
+          path: clusters/list
+          method: get
+          private: true
+          authorizer: aws_iam 
+  cluster_status:
+    handler: cluster_status.cluster_status
+    events:
+      - http:
+          path: clusters/cluster-status
+          method: get
+          private: true
+          authorizer: aws_iam 
+  clusters_per_environment:
+    handler: cluster_status.clusters_per_environment
+    events:
+      - http:
+          path: clusters/clusters-per-environment
+          method: get
+          private: true
+          authorizer: aws_iam 
+  set_cluster_environment:
+    handler: cluster_status.set_cluster_environment
+    events:
+      - http:
+          path: clusters/set-cluster-environment
+          method: get
+          private: true
+          authorizer: aws_iam 
+  set_cluster_status:
+    handler: cluster_status.set_cluster_status
+    events:
+      - http:
+          path: clusters/set-cluster-status
+          method: get
+          private: true
+          authorizer: aws_iam 
+  set_cluster_metadata:
+    handler: cluster_status.set_cluster_metadata
+    events:
+      - http:
+          path: clusters/set-cluster-metadata
+          method: post
+          private: true
+          authorizer: aws_iam 
+  get_cluster_metadata:
+    handler: cluster_status.get_cluster_metadata
+    events:
+      - http:
+          path: clusters/get-cluster-metadata
+          method: get
+          private: true
+          authorizer: aws_iam 
+
+resources:
+  Resources:
+    KubeAuthStoreClustersDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Delete
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 2
+          WriteCapacityUnits: 3
+        TableName: '${self:provider.environment.DYNAMODB_TABLE_K8_CLUSTERS}'

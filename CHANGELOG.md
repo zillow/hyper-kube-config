@@ -4,6 +4,11 @@ This file is used to list changes made in each version of hyper-kube-config.
 
 ## unreleased
 
+## 0.6.0 (2020-10-21)
+- [Zane Williamson]
+  - Adding support for IAM Authentication to hyperkube
+  - Adding additional cli flags for `--hyperkube-url`, `--hyperkube-stage`, `--aws-profile`, `--aws-region`, `--x-api-key`
+
 ## 0.5.1 (2020-04-20)
 - [Christopher Zorn]
   - Fix json serialization of set objects in cluster metadata return

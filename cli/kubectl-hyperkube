@@ -3,11 +3,49 @@
 import click
 import json
 from pathlib import Path
+from aws_requests_auth.boto_utils import AWSRequestsAuth
+from urllib.parse import urlparse
 
-import requests
 import sys
 import yaml
 import os
+import boto3
+import requests
+import http.client as http_client
+http_client.HTTPConnection.debuglevel = 1
+
+DEFAULT_AWS_REGION = os.environ.get('DEFAULT_AWS_REGION', 'us-west-2')
+AWS_PROFILE = os.environ.get('AWS_PROFILE', None)
+
+
+class AWSProfileAuth(AWSRequestsAuth):
+    def __init__(self, aws_host, aws_region, aws_service, profile):
+        self.profile = profile
+        super(AWSProfileAuth, self).__init__(
+            None, None, aws_host, aws_region, aws_service, profile)
+        self._refreshable_credentials = boto3.Session(
+            profile_name=self.profile).get_credentials()
+
+    def get_aws_request_headers_handler(self, r):
+        credentials = get_credentials(
+            self._refreshable_credentials, profile_name=self.profile)
+        return self.get_aws_request_headers(r, **credentials)
+
+
+def get_credentials(credentials_obj=None, profile_name=None):
+    """
+    Override aws_requests_auth.boto_utils to support profiles
+    # https://github.com/DavidMuller/aws-requests-auth/issues/51
+    """
+    if credentials_obj is None:
+        credentials_obj = boto3.Session(
+            profile_name=profile_name).get_credentials()
+    frozen_credentials = credentials_obj.get_frozen_credentials()
+    return {
+        'aws_access_key': frozen_credentials.access_key,
+        'aws_secret_access_key': frozen_credentials.secret_key,
+        'aws_token': frozen_credentials.token,
+    }
 
 
 def hkc_print(message, *args, **kwargs):
@@ -17,13 +55,55 @@ def hkc_print(message, *args, **kwargs):
 @click.group()
 @click.option('--config', '-c', required=False,
               default=str(Path.home()) + "/hyperkube-config.yaml")
+@click.option('--hyperkube-url', required=False, default=None)
+@click.option('--hyperkube-stage', required=False, default=None)
+@click.option('--aws-profile', required=False, default=None)
+@click.option('--x-api-key', required=False, default=None)
+@click.option('--aws-region', required=False, default=None)
 @click.pass_context
-def cli(ctx, config):
+def cli(ctx, config, hyperkube_url,
+        hyperkube_stage, aws_profile, x_api_key, aws_region):
     ctx.ensure_object(dict)
-    ctx.obj['hyperkube_config'] = _load_config(config)
-    ctx.obj['url'] = ctx.obj['hyperkube_config']['url']
-    ctx.obj['stage'] = ctx.obj['hyperkube_config']['stage']
-    headers = {'X-Api-Key': ctx.obj['hyperkube_config']['x_api_key']}
+
+    # Load user provided config file, these options can be
+    # overidden by commandline flags
+    if config and os.path.exists(config):
+        ctx.obj['hyperkube_config'] = _load_config(config)
+    else:
+        ctx.obj['hyperkube_config'] = {}
+
+    if hyperkube_url is None:
+        hyperkube_url = ctx.obj['hyperkube_config']['url']
+
+    u = urlparse(hyperkube_url)
+    hostname = u.netloc
+
+    if hyperkube_stage is None:
+        hyperkube_stage = ctx.obj['hyperkube_config']['stage']
+
+    if aws_region is None:
+        aws_region = ctx.obj['hyperkube_config'].get(
+                             'aws_region', DEFAULT_AWS_REGION)
+
+    if aws_profile is None:
+        aws_profile = ctx.obj['hyperkube_config'].get(
+                              'aws_profile', AWS_PROFILE)
+
+    auth = AWSProfileAuth(aws_host=hostname,
+                          aws_region=aws_region,
+                          aws_service='execute-api',
+                          profile=aws_profile)
+
+    ctx.obj['base_url'] = f'{hyperkube_url}/{hyperkube_stage}'
+    ctx.obj['auth'] = auth
+
+    # Load api key from cli flag. If not provided try config
+    headers = None
+    if x_api_key is None:
+        x_api_key = ctx.obj['hyperkube_config'].get(
+                            'x_api_key')
+    if x_api_key is not None:
+        headers = {'X-Api-Key': x_api_key}
     ctx.obj['headers'] = headers
 
 
@@ -33,10 +113,7 @@ def list(ctx):
     """List all clusters in hyper-kube-config"""
 
     try:
-        r = requests.get(
-            f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/list',
-            headers=ctx.obj['headers']
-        )
+        r = _request(ctx, "GET", "/clusters/list")
         hkc_print(sorted(r.json()))
         if r.status_code != 200:
             sys.exit(1)
@@ -54,11 +131,7 @@ def add(ctx, k8s_config):
     print(k8s_cfg)
 
     try:
-        r = requests.post(
-            f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/add',
-            headers=ctx.obj['headers'],
-            data=k8s_cfg
-        )
+        r = _request(ctx, "POST", "/clusters/add", data=k8s_cfg)
         hkc_print(r.json())
         if r.status_code == 404:
             sys.exit(1)
@@ -77,11 +150,7 @@ def add_ca_key(ctx, cluster_name, ca_key):
     post = {"cluster_name": cluster_name, "ca_key": key}
 
     try:
-        r = requests.post(
-            f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/add-ca-key',
-            headers=ctx.obj['headers'],
-            data=post
-        )
+        r = _request(ctx, "POST", "/clusters/add-ca-key", data=post)
         hkc_print(r.json())
     except requests.exceptions.RequestException as err:
         print(f'Request error: {err}')
@@ -94,11 +163,8 @@ def remove_ca_key(ctx, cluster_name):
     """Remove specified cluster CA key from hyper-kube-config"""
 
     try:
-        r = requests.get(
-            (f'{ctx.obj["url"]}/{ctx.obj["stage"]}'
-             f'/clusters/remove-ca-key?{cluster_name}'),
-            headers=ctx.obj['headers']
-        )
+        r = _request(ctx, "GET", "/clusters/remove-ca-key",
+                     query_string=f"?{cluster_name}")
         hkc_print(r.json())
         if r.status_code == 404:
             sys.exit(1)
@@ -112,12 +178,10 @@ def remove_ca_key(ctx, cluster_name):
 def remove(ctx, cluster_to_remove):
     """Remove cluster from hyper-kube-config"""
 
+    data = json.dumps({"cluster_name": cluster_to_remove})
+
     try:
-        r = requests.post(
-            f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/remove',
-            headers=ctx.obj['headers'],
-            data=json.dumps({"cluster_name": cluster_to_remove})
-        )
+        r = _request(ctx, "POST", "/clusters/remove", data=data)
         hkc_print(r.json())
         if r.status_code == 404:
             sys.exit(1)
@@ -135,7 +199,7 @@ def get(ctx, cluster, k8s_config, merge):
     """Retrieve and concatenate one or more cluster configs into one config,
     set context to first cluster"""
 
-    param_string = ""
+    param_string = "?"
     for c in cluster:
         param_string = param_string + c + "&"
 
@@ -143,11 +207,8 @@ def get(ctx, cluster, k8s_config, merge):
     param_string = param_string[:-1]
 
     try:
-        r = requests.get(
-            (f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/get-k8-config?'
-             f'{param_string}'),
-            headers=ctx.obj['headers']
-        )
+        r = _request(ctx, "GET", "/clusters/get-k8-config",
+                     query_string=param_string)
         print(r.json())
         if merge:
             _merge(k8s_config, r.json())
@@ -166,10 +227,7 @@ def get_all(ctx, k8s_config, merge):
     """Retrieve and concatenate all cluster configs into one config"""
 
     try:
-        r = requests.get(
-            f'{ctx.obj["url"]}/{ctx.obj["stage"]}/clusters/get-all-k8-configs',
-            headers=ctx.obj['headers']
-        )
+        r = _request(ctx, "GET", "/clusters/get-all-k8-configs")
         print(r.json())
         if merge:
             _merge(k8s_config, r.json())
@@ -186,11 +244,8 @@ def get_pem(ctx, cluster):
     """Get the pem file for a specific cluster"""
 
     try:
-        r = requests.get(
-            (f'{ctx.obj["url"]}/{ctx.obj["stage"]}'
-             f'/clusters/get-pem?cluster_name={cluster}'),
-            headers=ctx.obj['headers']
-        )
+        r = _request(ctx, "GET", "/clusters/get-pem",
+                     query_string=f"?cluster_name={cluster}")
         print(r.text)
         if r.status_code == 404:
             sys.exit(1)
@@ -208,12 +263,9 @@ def add_pem(ctx, cluster, pem):
     pem_data = _load_pem(pem)
 
     try:
-        r = requests.post(
-            (f'{ctx.obj["url"]}/{ctx.obj["stage"]}'
-             f'/clusters/add-pem?cluster_name={cluster}'),
-            headers=ctx.obj['headers'],
-            data=pem_data
-        )
+        r = _request(ctx, "POST", "/clusters/add-pem",
+                     query_string=f"?cluster_name={cluster}",
+                     data=pem_data)
         hkc_print(r.json())
         if r.status_code == 404:
             sys.exit(1)
@@ -232,12 +284,9 @@ def set_cluster_status(ctx, environment, status, cluster):
     if environment:
         try:
             print(f'Setting cluster environment to {environment}')
-            r = requests.get(
-                (f'{ctx.obj["url"]}/{ctx.obj["stage"]}'
-                 f'/clusters/set-cluster-environment?cluster_name={cluster}'
-                 f'&environment={environment}'),
-                headers=ctx.obj['headers']
-            )
+            r = _request(ctx, "GET", "/clusters/set-cluster-environment",
+                         query_string=f'?cluster_name={cluster}'
+                         f'&environment={environment}')
             if r.status_code == 404:
                 sys.exit(1)
         except requests.exceptions.RequestException as err:
@@ -245,12 +294,9 @@ def set_cluster_status(ctx, environment, status, cluster):
     if status:
         try:
             print(f'Setting cluster status {status}')
-            r = requests.get(
-                (f'{ctx.obj["url"]}/{ctx.obj["stage"]}'
-                 f'/clusters/set-cluster-status?cluster_name={cluster}'
-                 f'&cluster_status={status}'),
-                headers=ctx.obj['headers']
-            )
+            r = _request(ctx, "GET", "/clusters/set-cluster-status",
+                         query_string=f'?cluster_name={cluster}'
+                         f'&cluster_status={status}')
             if r.status_code == 404:
                 sys.exit(1)
         except requests.exceptions.RequestException as err:
@@ -269,12 +315,9 @@ def get_cluster_status(ctx, environment, status):
     """Get clusters of a given status in a particular environment"""
 
     try:
-        r = requests.get(
-            (f'{ctx.obj["url"]}/{ctx.obj["stage"]}'
-             f'/clusters/cluster-status?cluster_status={status}'
-             f'&environment={environment}'),
-            headers=ctx.obj['headers']
-        )
+        r = _request(ctx, "GET", "/clusters/cluster-status",
+                     query_string=f'?cluster_status={status}'
+                     f'&environment={environment}')
         print(json.dumps(r.json()))
         if r.status_code == 404:
             sys.exit(1)
@@ -287,12 +330,12 @@ def get_cluster_status(ctx, environment, status):
 @click.pass_context
 def get_cluster_for_environment(ctx, environment):
     """Get clusters of a given status in a particular environment"""
-    req_path = (f'{ctx.obj["url"]}/{ctx.obj["stage"]}'
-                f'/clusters/clusters-per-environment')
+    param_string = None
     if environment is not None:
-        req_path += f'?environment={environment}'
+        param_string = f'?environment={environment}'
     try:
-        r = requests.get(req_path, headers=ctx.obj['headers'])
+        r = _request(ctx, "GET", "/clusters/clusters-per-environment",
+                     query_string=param_string)
         hkc_print(r.json())
         if r.status_code == 404:
             sys.exit(1)
@@ -308,14 +351,12 @@ def set_cluster_metadata(ctx, metadata_file, cluster):
     """Set cluster metadata """
 
     metadata = _load_config(metadata_file)
+    data = json.dumps(metadata)
     try:
         print(f'Setting cluster {cluster} metadata.')
-        r = requests.post(
-            (f'{ctx.obj["url"]}/{ctx.obj["stage"]}'
-             f'/clusters/set-cluster-metadata?cluster_name={cluster}'),
-            headers=ctx.obj['headers'],
-            data=json.dumps(metadata)
-        )
+        r = _request(ctx, "POST", "/clusters/set-cluster-metadata",
+                     query_string=f'?cluster_name={cluster}',
+                     data=data)
         if r.status_code == 404:
             sys.exit(1)
         hkc_print(r.json())
@@ -330,16 +371,37 @@ def get_cluster_metadata(ctx, cluster):
     """Get cluster metadata for a give cluster name"""
 
     try:
-        r = requests.get(
-            (f'{ctx.obj["url"]}/{ctx.obj["stage"]}'
-             f'/clusters/get-cluster-metadata?cluster_name={cluster}'),
-            headers=ctx.obj['headers']
-        )
+        r = _request(ctx, "GET", "/clusters/get-cluster-metadata",
+                     query_string=f'?cluster_name={cluster}')
         hkc_print(r.json())
         if r.status_code == 404:
             sys.exit(1)
     except requests.exceptions.RequestException as err:
         print(f'Request error: {err}')
+
+
+def _request(ctx, verb, api_endpoint,
+             query_string=None, headers=None, data=None):
+    """Build http request"""
+
+    base_url = ctx.obj['base_url']
+    url = base_url + api_endpoint
+
+    if query_string is not None:
+        url = url + query_string
+    auth = ctx.obj['auth']
+
+    # Ability to add headers beyond api key
+    if headers is not None:
+        headers.update(**ctx.obj['headers'])
+    else:
+        headers = ctx.obj['headers']
+
+    response = requests.request(verb, headers=headers,
+                                url=url,
+                                auth=auth, data=data)
+
+    return response
 
 
 def _load_config(config):

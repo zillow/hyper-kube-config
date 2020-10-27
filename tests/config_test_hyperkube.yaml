@@ -1,0 +1,6 @@
+---
+url: https://123456780.execute-api.us-west-2.amazonaws.com
+stage: dev
+x_api_key: 1234567891abcfedrtas123454321Z1234567891
+aws_profile: default
+region: us-west-2
