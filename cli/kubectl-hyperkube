@@ -11,8 +11,6 @@ import yaml
 import os
 import boto3
 import requests
-import http.client as http_client
-http_client.HTTPConnection.debuglevel = 1
 
 DEFAULT_AWS_REGION = os.environ.get('DEFAULT_AWS_REGION', 'us-west-2')
 AWS_PROFILE = os.environ.get('AWS_PROFILE', None)
