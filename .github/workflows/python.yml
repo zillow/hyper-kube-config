@@ -1,0 +1,32 @@
+name: Python Tests
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7, 3.8]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r tests/requirements.txt 
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 *.py tests cli/kubectl-hyperkube 
+    - name: Test with pytest
+      run: |
+        mkdir -p ~/.aws/
+        printf "[default]\nregion=us-west-2" > ~/.aws/config
+        python -m unittest discover -v -s tests/ -p "*.py"
