@@ -1,6 +1,6 @@
 # hyper-kube-config
 
-[![Build Status](https://travis-ci.org/zillow/hyper-kube-config.svg?branch=master)](https://travis-ci.org/zillow/hyper-kube-config)
+![Python Tests](https://github.com/zillow/hyper-kube-config/workflows/Python%20Tests/badge.svg)
 
 [![PyPI version](https://badge.fury.io/py/hyper-kube-config.svg)](https://badge.fury.io/py/hyper-kube-config)
 

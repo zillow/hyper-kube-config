@@ -41,4 +41,4 @@ example to give account, user and role access:
   --snip--
 ```
 
-Each function will also need to have 'authorizer' set to `aws_iam`. Step 3 needs to be done all at once. 
+Each function will also need to have 'authorizer' set to `aws_iam`. Step 3 needs to be done all at once.
