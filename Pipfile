@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 boto3 = "==1.12.37"
-cryptography = "==3.2"
+cryptography = "==3.3.2"
 click = "==7.1.1"
 pyyaml = "==5.3.1"
 requests = "==2.23.0"
