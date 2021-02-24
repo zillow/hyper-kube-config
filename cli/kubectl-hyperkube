@@ -13,7 +13,6 @@ import boto3
 import requests
 
 DEFAULT_AWS_REGION = os.environ.get('DEFAULT_AWS_REGION', 'us-west-2')
-AWS_PROFILE = os.environ.get('AWS_PROFILE', None)
 
 
 class AWSProfileAuth(AWSRequestsAuth):
@@ -83,14 +82,21 @@ def cli(ctx, config, hyperkube_url,
         aws_region = ctx.obj['hyperkube_config'].get(
                              'aws_region', DEFAULT_AWS_REGION)
 
-    if aws_profile is None:
-        aws_profile = ctx.obj['hyperkube_config'].get(
-                              'aws_profile', AWS_PROFILE)
-
-    auth = AWSProfileAuth(aws_host=hostname,
-                          aws_region=aws_region,
-                          aws_service='execute-api',
-                          profile=aws_profile)
+    # Establish auth header values if AWS profile is requested to be used
+    if aws_profile:
+        auth = AWSProfileAuth(aws_host=hostname,
+                              aws_region=aws_region,
+                              aws_service='execute-api',
+                              profile=aws_profile)
+    # If aws-profile not provided by CLI, check for aws-profile in config file
+    elif ctx.obj['hyperkube_config'].get('aws_profile'):
+        aws_profile = ctx.obj['hyperkube_config'].get('aws_profile')
+        auth = AWSProfileAuth(aws_host=hostname,
+                              aws_region=aws_region,
+                              aws_service='execute-api',
+                              profile=aws_profile)
+    else:
+        auth = None
 
     ctx.obj['base_url'] = f'{hyperkube_url}/{hyperkube_stage}'
     ctx.obj['auth'] = auth
