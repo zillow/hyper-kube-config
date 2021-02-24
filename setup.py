@@ -15,12 +15,12 @@ URL = 'https://github.com/zillow/hyper-kube-config'
 EMAIL = 'zane@ugh.cloud'
 AUTHOR = 'Zane Williamson'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '0.6.1'
+VERSION = '0.6.2'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
     'boto3==1.12.37',
-    'cryptography==2.9',
+    'cryptography==3.3.2',
     'click==7.1.1',
     'pyyaml==5.3.1',
     'requests==2.23.0',
