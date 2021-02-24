@@ -82,7 +82,7 @@ def cli(ctx, config, hyperkube_url,
         aws_region = ctx.obj['hyperkube_config'].get(
                              'aws_region', DEFAULT_AWS_REGION)
 
-    # Establish auth header values if AWS profile is requested to be used
+    # Establish auth header values if AWS profile is requested via --aws-profile flag # noqa
     if aws_profile:
         auth = AWSProfileAuth(aws_host=hostname,
                               aws_region=aws_region,
