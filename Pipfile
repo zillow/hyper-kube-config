@@ -7,7 +7,7 @@ name = "pypi"
 boto3 = "==1.12.37"
 cryptography = "==3.3.2"
 click = "==7.1.1"
-pyyaml = "==5.3.1"
+pyyaml = "==5.4"
 requests = "==2.23.0"
 aws-requests-auth = "==0.4.3"
 
